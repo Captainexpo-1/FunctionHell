@@ -1,0 +1,8 @@
+var int x = (2 + 2) + (2 - y) / 2
+
+if (x > 0) {
+    var int x = (2 + 2) + (2 - y) / 2
+}
+else if (x == 2){
+    var int x = (2 + 2) + (2 - y) / 2
+}
