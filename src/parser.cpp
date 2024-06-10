@@ -56,6 +56,7 @@ Token Parser::m_eat(TOKENTYPE type) {
     } else {
         m_error("Unexpected token: " + m_CurrentToken.toString(), m_CurrentToken.line, m_CurrentToken.col);
     }
+    return Token();
 }
 
 
@@ -70,6 +71,7 @@ Token Parser::m_eatAny(TOKENTYPE types[]){
         }
     }
     m_error("Unexpected token: " + m_CurrentToken.toString(), m_CurrentToken.line, m_CurrentToken.col);
+    return Token();
 }
 
 Program* Parser::m_parseProgram() {
@@ -117,7 +119,7 @@ ASTNode* Parser::m_parseNode() {
     else {
         m_error("Unexpected token in parseNode: " + m_CurrentToken.toString(), m_CurrentToken.line, m_CurrentToken.col);
     }
-
+    return nullptr;
 }
 
 VariableAssignment* Parser::m_parseVariableAssignment() {
@@ -142,6 +144,7 @@ DataType* Parser::m_parseDataType(Token data_type) {
         default:
             m_error("Unexpected token: " + data_type.toString(), data_type.line, data_type.col);
     }
+    return nullptr;
 }
 
 
@@ -171,6 +174,7 @@ Expression* Parser::m_parseAtom() {
     else{
         m_error("Unexpected token: " + m_CurrentToken.toString(), m_CurrentToken.line, m_CurrentToken.col);
     }
+    return nullptr;
 }
 
 std::vector<ASTNode*> Parser::m_parseBlock() {

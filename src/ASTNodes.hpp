@@ -6,6 +6,7 @@
 
 class ASTNode {
 public:
+    ASTNode();
     virtual std::string toString() = 0;
 };
 

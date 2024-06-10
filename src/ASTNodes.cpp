@@ -1,14 +1,16 @@
 #include "ASTNodes.hpp"
 #include <iostream>
 
+ASTNode::ASTNode() {}
+
 std::string ASTNode::toString() {
     return "ASTNode";
 }
 
+
 std::string Statement::toString() {
     return "Statement";
 }
-
 std::string Expression::toString() {
     return "Expression";
 }
