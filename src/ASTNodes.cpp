@@ -25,7 +25,6 @@ std::string Program::toString() {
 
 void Program::print() {
     for (ASTNode* statement : statements) {
-        std::cout << "PRINTING: " << statement << std::endl;
         std::cout << statement->toString() << std::endl;
     }
 }
@@ -60,10 +59,37 @@ std::string VariableDeclaration::toString() {
     return "VariableDeclaration(name=" + name + ", type=" + type->toString() + ", value=" + value->toString() + ")";
 }
 
+Function::Function(std::vector<FunctionParameter*> params, DataType* returnType, std::vector<ASTNode*> body) : params(params), returnType(returnType), body(body) {}
+
+std::string Function::toString() {
+    std::string o = "Function(params=(";
+    for(FunctionParameter* param: params){
+        o += param->toString() + ", ";
+    }
+    o += "), returnType=" + returnType->toString() + ", body=(";
+    for(ASTNode* node: body){
+        o += node->toString() + ", ";
+    }
+    o += "))";
+    return o;
+}
+
+FunctionParameter::FunctionParameter(std::string name, DataType* type) : name(name), type(type) {}
+
+std::string FunctionParameter::toString() {
+    return "FunctionParameter(name=" + name + ", type=" + type->toString() + ")";
+}
+
 VariableAssignment::VariableAssignment(std::string name, Expression* value) : name(name), value(value) {}
 
 std::string VariableAssignment::toString() {
     return "VariableAssignment(name=" + name + ", value=" + value->toString() + ")";
+}
+
+ReturnStatement::ReturnStatement(Expression* value) : value(value) {}
+
+std::string ReturnStatement::toString() {
+    return "ReturnStatement(value=" + value->toString() + ")";
 }
 
 IfStatement::IfStatement(Expression* condition, std::vector<ASTNode*> body, std::vector<ASTNode*> elseBody) : condition(condition), body(body), elseBody(elseBody) {}
@@ -81,10 +107,15 @@ std::string IfStatement::toString() {
     return o;
 }
 
-VariableAccess::VariableAccess(std::string name) : name(name) {}
+VariableAccess::VariableAccess(std::string name, std::vector<Expression*> args) : name(name), args(args) {}
 
 std::string VariableAccess::toString() {
-    return "VariableAccess(name="+name+")";
+    std::string o = "VariableAccess(name=" + name + ", args=(";
+    for(Expression* arg: args){
+        o += arg->toString() + ", ";
+    }
+    o += "))";
+    return o;
 }
 
 BinaryExpression::BinaryExpression(Expression* left, Expression* right, std::string op) : left(left), op(op), right(right) {}

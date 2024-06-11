@@ -1,5 +1,5 @@
 #include "parser.hpp"
-
+#include <algorithm>
 
 std::map<TOKENTYPE, int> ORDER_OF_OPERATIONS = {
     {PLUS, 10},
@@ -37,7 +37,7 @@ Program* Parser::parse(std::vector<Token> tokens) {
 
 void Parser::m_advance() {
     m_CurrentIndex += 1;
-    if (m_CurrentIndex < m_Tokens.size()) {
+    if (m_CurrentIndex < (int)m_Tokens.size()) {
         m_CurrentToken = m_Tokens[m_CurrentIndex];
     }
 }
@@ -54,15 +54,15 @@ Token Parser::m_eat(TOKENTYPE type) {
         m_advance();
         return eatenToken;
     } else {
-        m_error("Unexpected token: " + m_CurrentToken.toString(), m_CurrentToken.line, m_CurrentToken.col);
+        m_error("Unexpected token in EAT: " + m_CurrentToken.toString(), m_CurrentToken.line, m_CurrentToken.col);
     }
     return Token();
 }
 
 
 
-Token Parser::m_eatAny(TOKENTYPE types[]){
-    for (int i = 0; i < sizeof(types)/sizeof(TOKENTYPE); i++) {
+Token Parser::m_eatAny(std::vector<TOKENTYPE> types){
+    for (int i = 0; i < ((int)sizeof(types))/((int)sizeof(TOKENTYPE)); i++) {
         TOKENTYPE type = types[i];
         if (m_CurrentToken.type == type) {
             Token eatenToken = m_CurrentToken;
@@ -70,7 +70,7 @@ Token Parser::m_eatAny(TOKENTYPE types[]){
             return eatenToken;
         }
     }
-    m_error("Unexpected token: " + m_CurrentToken.toString(), m_CurrentToken.line, m_CurrentToken.col);
+    m_error("Unexpected token in EATANY: " + m_CurrentToken.toString(), m_CurrentToken.line, m_CurrentToken.col);
     return Token();
 }
 
@@ -84,10 +84,27 @@ Program* Parser::m_parseProgram() {
     return new Program(statements);
 }
 
-Expression* Parser::m_parseExpression(int precedence) {
-    if (precedence == NULL){
-        precedence = 0;
+std::vector<FunctionParameter*> Parser::m_parseFunctionParams() {
+    std::vector<FunctionParameter*> params = {};
+    while (m_CurrentToken.type != GREATER) {
+        DataType* dataType = m_parseDataType(m_eatAny(DATA_TYPES));
+        std::string name = m_eat(IDENTIFIER).value; 
+        params.push_back(new FunctionParameter(name, dataType));
+        if (m_CurrentToken.type != GREATER) m_eat(COMMA);
     }
+    return params;
+}
+
+Function* Parser::m_parseFunctionLiteral() {
+    DataType* dataType = m_parseDataType(m_eatAny(DATA_TYPES));
+    m_eat(LESS);
+    std::vector<FunctionParameter*> params = m_parseFunctionParams();
+    m_eat(GREATER);
+    std::vector<ASTNode*> body = m_parseBlock();
+    return new Function(params, dataType, body);
+}
+
+Expression* Parser::m_parseExpression(int precedence) {
     Expression* left = m_parseAtom();
     while (ORDER_OF_OPERATIONS.find(m_CurrentToken.type) != ORDER_OF_OPERATIONS.end() && ORDER_OF_OPERATIONS[m_CurrentToken.type] >= precedence) {
         std::string op = m_CurrentToken.value;
@@ -103,14 +120,17 @@ ASTNode* Parser::m_parseNode() {
         return m_parseVariableDeclaration();
     }
     else if(m_CurrentToken.type == IF_KEYWORD) {
-        std::cout << "PARSING IF STATEMENT" << std::endl;
+        //std::cout << "PARSING IF STATEMENT" << std::endl;
         return m_parseIfStatement();
     }
-    else if (m_CurrentToken.type == IDENTIFIER) {
-        return m_parseVariableAssignment();
+    else if (m_CurrentToken.type == IDENTIFIER){
+        return m_parseVariableAccess();
     }
     else if (std::find(ATOMS.begin(), ATOMS.end(), m_CurrentToken.type) != ATOMS.end()){
         return m_parseExpression();
+    }
+    else if (m_CurrentToken.type == RETURN_KEYWORD){
+        return m_parseReturnStatement();
     }
     else if (m_CurrentToken.type == NEWLINE){
         m_eat(NEWLINE);
@@ -142,12 +162,38 @@ DataType* Parser::m_parseDataType(Token data_type) {
         case VOID_TYPE:
             return new VoidType();
         default:
-            m_error("Unexpected token: " + data_type.toString(), data_type.line, data_type.col);
+            m_error("Unexpected token in PARSEDATATYPE: " + data_type.toString(), data_type.line, data_type.col);
     }
     return nullptr;
 }
 
+ReturnStatement* Parser::m_parseReturnStatement() {
+    m_eat(RETURN_KEYWORD);
+    Expression* value = m_parseExpression();
+    return new ReturnStatement(value);
+}
 
+std::vector<Expression*> Parser::m_parseFunctionCallArgs() {
+    std::vector<Expression*> args = {};
+    m_eat(LPAREN);
+    while (m_CurrentToken.type != RPAREN) {
+        args.push_back(m_parseExpression());
+        if (m_CurrentToken.type != RPAREN) m_eat(COMMA);
+    }
+    m_eat(RPAREN);
+    return args;
+}
+
+VariableAccess* Parser::m_parseVariableAccess() {
+    std::string name = m_eat(IDENTIFIER).value;
+    std::vector<Expression*> args = {};
+    //std::cout << "VAR ACCESS CURRENT TOKEN: " << m_CurrentToken.toString() << std::endl;
+    if (m_CurrentToken.type == WITH_KEYWORD){
+        m_eat(WITH_KEYWORD);
+        args = m_parseFunctionCallArgs();
+    }
+    return new VariableAccess(name, args);
+}
 
 Expression* Parser::m_parseAtom() {
     if (m_CurrentToken.type == INTEGER){
@@ -163,7 +209,10 @@ Expression* Parser::m_parseAtom() {
         return new BooleanLiteral(m_eat(BOOL).value == "true");
     }
     else if (m_CurrentToken.type == IDENTIFIER){
-        return new VariableAccess(m_eat(IDENTIFIER).value);
+        return m_parseVariableAccess();
+    }
+    else if (std::find(DATA_TYPES.begin(), DATA_TYPES.end(), m_CurrentToken.type) != DATA_TYPES.end()){
+        return m_parseFunctionLiteral();
     }
     else if (m_CurrentToken.type == LPAREN){
         m_advance();
@@ -171,8 +220,11 @@ Expression* Parser::m_parseAtom() {
         m_eat(RPAREN);
         return expr;
     }
+    else if (m_CurrentToken.type == LESS){
+        // This is a functon
+    }
     else{
-        m_error("Unexpected token: " + m_CurrentToken.toString(), m_CurrentToken.line, m_CurrentToken.col);
+        m_error("Unexpected token in PARSEATOM: " + m_CurrentToken.toString(), m_CurrentToken.line, m_CurrentToken.col);
     }
     return nullptr;
 }
@@ -180,10 +232,11 @@ Expression* Parser::m_parseAtom() {
 std::vector<ASTNode*> Parser::m_parseBlock() {
     std::vector<ASTNode*> statements;
     m_eat(LBRACE);
+    m_skipWhitespace();
     while (m_CurrentToken.type != RBRACE) {
         ASTNode* node = m_parseNode();
         if (node != NULL) statements.push_back(node);
-        if (m_CurrentToken.type == NEWLINE) m_eat(NEWLINE);
+        m_skipWhitespace();
     }
     m_eat(RBRACE);
     return statements;
@@ -206,7 +259,7 @@ IfStatement* Parser::m_parseIfStatement() {
     std::vector<ASTNode*> body = m_parseBlock();
     std::vector<ASTNode*> elseBody;
     m_skipWhitespace();
-    std::cout << "END OF IF: " << m_CurrentToken.toString() << std::endl;
+    //std::cout << "END OF IF: " << m_CurrentToken.toString() << std::endl;
     if (m_CurrentToken.type == ELSE_KEYWORD) {
         m_eat(ELSE_KEYWORD);
         if (m_CurrentToken.type == IF_KEYWORD){

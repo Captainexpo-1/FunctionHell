@@ -3,7 +3,7 @@ CC = g++
 CFLAGS = -Wall -Wextra -std=c++11
 
 # Source files and object files
-SRCS = main.cpp lexer.cpp tokens.cpp parser.cpp ASTNodes.cpp
+SRCS = main.cpp lexer.cpp tokens.cpp ASTNodes.cpp parser.cpp
 OBJS = $(addprefix $(OUTPUT_DIR)/obj/,$(SRCS:.cpp=.o))
 
 # Target executable

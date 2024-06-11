@@ -48,6 +48,7 @@ enum TOKENTYPE {
     GREATER,
     GREATER_EQUAL,
     VAR_KEYWORD,
+    RETURN_KEYWORD,
 };
 
 extern std::map<int, std::string> token_strings;
@@ -69,7 +70,8 @@ public:
     std::string toString();
 };
 
-extern TOKENTYPE DATA_TYPES[];
+extern std::vector<TOKENTYPE> DATA_TYPES;
+
 
 extern std::vector<TOKENTYPE> ATOMS;
 

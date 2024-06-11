@@ -89,10 +89,38 @@ public:
     std::string toString();
 };
 
+class ReturnStatement : public Statement {
+public:
+    Expression* value;
+    ReturnStatement(Expression* value);
+    std::string toString();
+};
+
+class FunctionParameter : public ASTNode {
+public:
+    std::string name;
+    DataType* type;
+    FunctionParameter(std::string name, DataType* type);
+    std::string toString();
+};
+
+class Function : public Expression {
+public:
+    std::string name;
+    std::vector<FunctionParameter*> params;
+    std::vector<ASTNode*> body;
+    DataType* returnType;
+    Function(std::vector<FunctionParameter*> params, DataType* returnType, std::vector<ASTNode*> body);
+    std::string toString();
+};
+
+
+
 class VariableAccess : public Expression {
 public:
     std::string name;
-    VariableAccess(std::string name);
+    std::vector<Expression*> args;
+    VariableAccess(std::string name, std::vector<Expression*> args);
     std::string toString();
 };
 

@@ -21,7 +21,7 @@ private:
     void m_advance();
     void m_skipWhitespace();
     Token m_eat(TOKENTYPE type);
-    Token m_eatAny(TOKENTYPE types[]);
+    Token m_eatAny(std::vector<TOKENTYPE> types);
     Program* m_parseProgram();
     ASTNode* m_genericParse();
     Expression* m_parseExpression(int precedence = 0);
@@ -33,7 +33,11 @@ private:
     IfStatement* m_parseIfStatement();
     std::vector<ASTNode*> m_parseBlock();
     VariableAssignment* m_parseVariableAssignment();
-
+    Function* m_parseFunctionLiteral();
+    std::vector<FunctionParameter*> m_parseFunctionParams();
+    std::vector<Expression*> m_parseFunctionCallArgs();
+    ReturnStatement* m_parseReturnStatement();
+    VariableAccess* m_parseVariableAccess();
 };
 
 

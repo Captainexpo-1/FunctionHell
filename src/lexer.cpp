@@ -21,7 +21,7 @@ std::vector<Token> Lexer::tokenize(std::string source) {
             if (std::regex_search(substring, match, regex, std::regex_constants::match_continuous)) {
                 if (tokenType != WHITESPACE && tokenType != COMMENT) { // Skip whitespaces and comments
                     
-                    std::cout << "GOT: " << token_strings[tokenType] << " at line " << m_Line << ", column " << m_Column << ": " << (tokenType != NEWLINE ? match.str() : "\\n") << std::endl;
+                    //std::cout << "GOT: " << token_strings[tokenType] << " at line " << m_Line << ", column " << m_Column << ": " << (tokenType != NEWLINE ? match.str() : "\\n") << std::endl;
                     tokens.emplace_back(tokenType, match.str(), m_Line, m_Column);
                     if(tokenType == NEWLINE) {
                         m_Line += 1;

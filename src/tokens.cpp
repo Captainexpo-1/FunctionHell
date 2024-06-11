@@ -12,6 +12,7 @@ std::vector<TOKENTYPE> token_priorities = {
     AND_KEYWORD,
     OR_KEYWORD,
     VAR_KEYWORD,
+    RETURN_KEYWORD,
     // ----- Types -----
     FLOAT_TYPE,
     INTEGER_TYPE,
@@ -93,6 +94,7 @@ std::map<int, std::string> token_regexes = {
     {GREATER, ">"},
     {GREATER_EQUAL, ">="},
     {VAR_KEYWORD, "var"},
+    {RETURN_KEYWORD, "ret"},
 };
 
 
@@ -138,9 +140,11 @@ std::map<int, std::string> token_strings = {
     {GREATER, "GREATER"},
     {GREATER_EQUAL, "GREATER_EQUAL"},
     {VAR_KEYWORD, "VAR_KEYWORD"},
+    {RETURN_KEYWORD, "RETURN_KEYWORD"},
+    {WITH_KEYWORD, "WITH_KEYWORD"},
 };
 
-TOKENTYPE DATA_TYPES[] = {
+std::vector<TOKENTYPE> DATA_TYPES = {
     INTEGER_TYPE, 
     FLOAT_TYPE, 
     STRING_TYPE, 
