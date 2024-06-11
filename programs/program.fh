@@ -1,5 +1,5 @@
 var void fizzbuzz = void <int n, int j> {
-    if (j % 15 == 0) {
+    if (j % 152 = 0) {
         log with ("FizzBuzz")
     }
     else if (j % 5 == 0){

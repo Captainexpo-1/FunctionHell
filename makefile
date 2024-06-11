@@ -3,7 +3,8 @@ CC = g++
 CFLAGS = -Wall -Wextra -std=c++11
 
 # Source files and object files
-SRCS = main.cpp lexer.cpp tokens.cpp ASTNodes.cpp parser.cpp
+
+SRCS = ../main.cpp ./lexer/lexer.cpp ./lexer/tokens/tokens.cpp ./errors/error.cpp ./parser/ast/ASTNodes.cpp ./parser/parser.cpp
 OBJS = $(addprefix $(OUTPUT_DIR)/obj/,$(SRCS:.cpp=.o))
 
 # Target executable
@@ -24,6 +25,12 @@ $(TARGET): $(OBJS)
 
 # Create output directory
 $(shell mkdir -p $(OUTPUT_DIR)/obj)
+# Create output sub-directories
+$(shell mkdir -p $(OUTPUT_DIR)/obj/lexer)
+$(shell mkdir -p $(OUTPUT_DIR)/obj/lexer/tokens)
+$(shell mkdir -p $(OUTPUT_DIR)/obj/errors)
+$(shell mkdir -p $(OUTPUT_DIR)/obj/parser)
+$(shell mkdir -p $(OUTPUT_DIR)/obj/parser/ast)
 
 # Clean up object files and the target executable
 clean:
