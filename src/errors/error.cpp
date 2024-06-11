@@ -7,7 +7,7 @@ void langError(std::string message, int line, int col) {
     if (m_Source != "") {
         std::cerr << "\e[1;31m" << "Error: " << message << " at line " << line << " column " << col << std::endl;
         std::cerr << m_SourceLines[line-1] << std::endl;
-        std::cerr << std::string(col-2, ' ') << "^" << "\e[0m" << std::endl;
+        std::cerr << std::string(col-1, ' ') << "^" << "\e[0m" << std::endl;
     } else{
         std::cerr << "\e[1;31m" << "Error: " << message << " at line " << line << " column " << col << "\e[0m" << std::endl;
     }
@@ -27,4 +27,5 @@ void setSource(std::string src) {
             line += c;
         }
     }
+    m_SourceLines.push_back(line);
 }

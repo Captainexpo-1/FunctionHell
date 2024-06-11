@@ -29,6 +29,16 @@ void Program::print() {
     }
 }
 
+ListLiteral::ListLiteral(std::vector<Expression*> elements, DataType* dataType) : elements(elements), dataType(dataType) {};
+
+std::string ListLiteral::toString(){
+    std::string result = "ListLiteral(elements=(";
+    for (Expression* e: elements){
+        result += e->toString() + ", ";
+    }
+    return result + "))";
+}
+
 IntegerLiteral::IntegerLiteral(int value) : value(value) {}
 
 std::string IntegerLiteral::toString() {
@@ -159,5 +169,8 @@ std::string VoidType::toString() {
     return "void";
 }
 
+ListType::ListType(DataType* subType) : subType(subType) {};
 
-
+std::string ListType::toString(){
+    return "list(" + subType->toString() + ")";
+}

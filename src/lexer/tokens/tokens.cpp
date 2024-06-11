@@ -19,6 +19,7 @@ std::vector<TOKENTYPE> token_priorities = {
     BOOL_TYPE,
     VOID_TYPE,
     NONE_TYPE,
+    LIST_TYPE,
     // ----- Literals -----
     BOOL,
     INTEGER,
@@ -66,6 +67,7 @@ std::map<int, std::string> token_regexes = {
     {BOOL_TYPE, "bool"},
     {VOID_TYPE, "void"},
     {NONE_TYPE, "none"},
+    {LIST_TYPE, "list"},
     {IF_KEYWORD, "if"},
     {ELSE_KEYWORD, "else"},
     {LBRACE, "\\{"},
@@ -142,6 +144,7 @@ std::map<int, std::string> token_strings = {
     {VAR_KEYWORD, "VAR_KEYWORD"},
     {RETURN_KEYWORD, "RETURN_KEYWORD"},
     {WITH_KEYWORD, "WITH_KEYWORD"},
+    {LIST_TYPE, "LIST_TYPE"}
 };
 
 std::vector<TOKENTYPE> DATA_TYPES = {
@@ -150,7 +153,8 @@ std::vector<TOKENTYPE> DATA_TYPES = {
     STRING_TYPE, 
     BOOL_TYPE, 
     VOID_TYPE, 
-    NONE_TYPE
+    NONE_TYPE,
+    LIST_TYPE
 };
 
 std::vector<TOKENTYPE> ATOMS = {
@@ -159,7 +163,7 @@ std::vector<TOKENTYPE> ATOMS = {
     FLOAT, 
     STRING, 
     BOOL, 
-    LPAREN
+    LPAREN,
 };
 
 Token::Token(TOKENTYPE type, std::string value, unsigned int line, unsigned int col)

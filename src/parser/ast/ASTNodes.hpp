@@ -33,6 +33,14 @@ public:
     std::string toString();
 };
 
+class ListLiteral : public Expression {
+public:
+    std::vector<Expression*> elements;
+    DataType* dataType;
+    ListLiteral(std::vector<Expression*> elements, DataType* dataType);
+    std::string toString();
+};
+
 // Literal nodes
 class IntegerLiteral : public Expression {
 public:
@@ -170,6 +178,13 @@ public:
 class VoidType : public DataType {
 public:
     VoidType();
+    std::string toString();
+};
+
+class ListType : public DataType {
+public:
+    DataType* subType;
+    ListType(DataType* subType);
     std::string toString();
 };
 

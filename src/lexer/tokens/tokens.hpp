@@ -20,6 +20,7 @@ enum TOKENTYPE {
     BOOL_TYPE,
     VOID_TYPE,
     NONE_TYPE,
+    LIST_TYPE,
     IF_KEYWORD,
     ELSE_KEYWORD,
     LBRACE,

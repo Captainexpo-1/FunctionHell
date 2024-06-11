@@ -25,7 +25,7 @@ $(TARGET): $(OBJS)
 
 # Create output directory
 $(shell mkdir -p $(OUTPUT_DIR)/obj)
-# Create output sub-directories
+# Create output sub-directories (there's probably a more concise way to do this)
 $(shell mkdir -p $(OUTPUT_DIR)/obj/lexer)
 $(shell mkdir -p $(OUTPUT_DIR)/obj/lexer/tokens)
 $(shell mkdir -p $(OUTPUT_DIR)/obj/errors)

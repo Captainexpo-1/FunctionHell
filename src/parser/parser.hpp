@@ -18,8 +18,10 @@ private:
     int m_CurrentIndex;
     std::vector<Token> m_Tokens;
     void m_advance();
+    Token m_peek();
     void m_skipWhitespace();
     Token m_eat(TOKENTYPE type);
+    void m_mightEat(TOKENTYPE type);
     Token m_eatAny(std::vector<TOKENTYPE> types);
     Program* m_parseProgram();
     ASTNode* m_genericParse();
@@ -32,11 +34,13 @@ private:
     IfStatement* m_parseIfStatement();
     std::vector<ASTNode*> m_parseBlock();
     VariableAssignment* m_parseVariableAssignment();
+    ASTNode* m_handleName();
     Function* m_parseFunctionLiteral();
     std::vector<FunctionParameter*> m_parseFunctionParams();
     std::vector<Expression*> m_parseFunctionCallArgs();
     ReturnStatement* m_parseReturnStatement();
     VariableAccess* m_parseVariableAccess();
+    ListLiteral* m_parseListLiteral();
 };
 
 

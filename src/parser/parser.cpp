@@ -38,6 +38,14 @@ void Parser::m_advance() {
     }
 }
 
+Token Parser::m_peek(){
+    if (m_CurrentIndex+1 < (int)m_Tokens.size()) {
+        return m_Tokens[m_CurrentIndex+1];
+    }
+    langError("Peeked out of scope", 0, 0);
+    return Token();
+}
+
 void Parser::m_skipWhitespace() {
     while (m_CurrentToken.type == NEWLINE){
         m_eat(NEWLINE);
@@ -50,23 +58,33 @@ Token Parser::m_eat(TOKENTYPE type) {
         m_advance();
         return eatenToken;
     } else {
-        langError("Unexpected token in EAT: " + m_CurrentToken.toString(), m_CurrentToken.line, m_CurrentToken.col);
+        langError("Unexpected token in EAT: " + m_CurrentToken.toString() + " | Expected: " + token_strings[type], m_CurrentToken.line, m_CurrentToken.col);
     }
     return Token();
 }
 
+void Parser::m_mightEat(TOKENTYPE type){
+    if(m_CurrentToken.type == type){
+        m_eat(type);
+    }
+}
 
 
 Token Parser::m_eatAny(std::vector<TOKENTYPE> types){
-    for (int i = 0; i < ((int)sizeof(types))/((int)sizeof(TOKENTYPE)); i++) {
+    for (int i = 0; i < (signed int)types.size(); i++) {
         TOKENTYPE type = types[i];
+        //std::cout << "CHECKING " << token_strings[type] << " AGAINST " << token_strings[m_CurrentToken.type] << std::endl; 
         if (m_CurrentToken.type == type) {
             Token eatenToken = m_CurrentToken;
             m_advance();
             return eatenToken;
         }
     }
-    langError("Unexpected token in EATANY: " + m_CurrentToken.toString(), m_CurrentToken.line, m_CurrentToken.col);
+    std::string t_string = "";
+    for (TOKENTYPE t : types){
+        t_string += token_strings[t] + ", ";
+    }
+    langError("Unexpected token in EATANY: " + m_CurrentToken.toString() + " | Expected: {" + t_string + "}", m_CurrentToken.line, m_CurrentToken.col);
     return Token();
 }
 
@@ -109,6 +127,10 @@ Expression* Parser::m_parseExpression(int precedence) {
         left = new BinaryExpression(left, right, op);
     }
     return left;
+}
+
+ASTNode* Parser::m_handleName() {
+    return nullptr;
 }
 
 ASTNode* Parser::m_parseNode() {
@@ -157,6 +179,8 @@ DataType* Parser::m_parseDataType(Token data_type) {
             return new BoolType();
         case VOID_TYPE:
             return new VoidType();
+        case LIST_TYPE:
+            return new ListType(m_parseDataType(m_eatAny(DATA_TYPES)));
         default:
             langError("Unexpected token in PARSEDATATYPE: " + data_type.toString(), data_type.line, data_type.col);
     }
@@ -191,6 +215,21 @@ VariableAccess* Parser::m_parseVariableAccess() {
     return new VariableAccess(name, args);
 }
 
+ListLiteral* Parser::m_parseListLiteral(){
+    DataType* dataType = m_parseDataType(m_eatAny(DATA_TYPES));
+    std::vector<Expression*> elements = {};
+    m_eat(LBRACE);
+    while (m_CurrentToken.type != RBRACE) {
+        m_skipWhitespace();
+        Expression* e = m_parseExpression();
+        elements.push_back(e);
+        if(m_CurrentToken.type != RBRACE) m_eat(COMMA);
+        m_skipWhitespace();
+    }
+    m_eat(RBRACE);
+    return new ListLiteral(elements, dataType);
+}
+
 Expression* Parser::m_parseAtom() {
     if (m_CurrentToken.type == INTEGER){
         return new IntegerLiteral(std::stoi(m_eat(INTEGER).value));
@@ -208,6 +247,8 @@ Expression* Parser::m_parseAtom() {
         return m_parseVariableAccess();
     }
     else if (std::find(DATA_TYPES.begin(), DATA_TYPES.end(), m_CurrentToken.type) != DATA_TYPES.end()){
+        Token peeked = m_peek();
+        if (peeked.type == LBRACE) return m_parseListLiteral();
         return m_parseFunctionLiteral();
     }
     else if (m_CurrentToken.type == LPAREN){
@@ -215,9 +256,6 @@ Expression* Parser::m_parseAtom() {
         Expression* expr = m_parseExpression();
         m_eat(RPAREN);
         return expr;
-    }
-    else if (m_CurrentToken.type == LESS){
-        // This is a functon
     }
     else{
         langError("Unexpected token in PARSEATOM: " + m_CurrentToken.toString(), m_CurrentToken.line, m_CurrentToken.col);
