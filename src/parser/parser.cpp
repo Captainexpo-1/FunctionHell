@@ -101,7 +101,7 @@ Program* Parser::m_parseProgram() {
 std::vector<FunctionParameter*> Parser::m_parseFunctionParams() {
     std::vector<FunctionParameter*> params = {};
     while (m_CurrentToken.type != GREATER) {
-        DataType* dataType = m_parseDataType(m_eatAny(DATA_TYPES));
+        DataType* dataType = m_parseDataType();
         std::string name = m_eat(IDENTIFIER).value; 
         params.push_back(new FunctionParameter(name, dataType));
         if (m_CurrentToken.type != GREATER) m_eat(COMMA);
@@ -110,7 +110,7 @@ std::vector<FunctionParameter*> Parser::m_parseFunctionParams() {
 }
 
 Function* Parser::m_parseFunctionLiteral() {
-    DataType* dataType = m_parseDataType(m_eatAny(DATA_TYPES));
+    DataType* dataType = m_parseDataType();
     m_eat(LESS);
     std::vector<FunctionParameter*> params = m_parseFunctionParams();
     m_eat(GREATER);
@@ -167,8 +167,10 @@ VariableAssignment* Parser::m_parseVariableAssignment() {
     return new VariableAssignment(name, value);
 }
 
-DataType* Parser::m_parseDataType(Token data_type) {
-    switch(data_type.type){
+DataType* Parser::m_parseDataType() {
+    Token t = m_eatAny(DATA_TYPES);
+    TOKENTYPE type = t.type;
+    switch(type){
         case INTEGER_TYPE:
             return new IntegerType();
         case FLOAT_TYPE:
@@ -179,10 +181,17 @@ DataType* Parser::m_parseDataType(Token data_type) {
             return new BoolType();
         case VOID_TYPE:
             return new VoidType();
-        case LIST_TYPE:
-            return new ListType(m_parseDataType(m_eatAny(DATA_TYPES)));
+        case LIST_TYPE: {
+            DataType* innerType;
+            {
+                innerType = m_parseDataType();
+            }
+            std::cout << "GOT INNER TYPE: " << innerType->toString() << std::endl;
+            std::cout << "CURTOKEN"<< m_CurrentToken.toString() << std::endl;
+            return new ListType(innerType);
+        }
         default:
-            langError("Unexpected token in PARSEDATATYPE: " + data_type.toString(), data_type.line, data_type.col);
+            langError("Unexpected data type: " + token_strings[type], t.line, t.col);
     }
     return nullptr;
 }
@@ -216,7 +225,7 @@ VariableAccess* Parser::m_parseVariableAccess() {
 }
 
 ListLiteral* Parser::m_parseListLiteral(){
-    DataType* dataType = m_parseDataType(m_eatAny(DATA_TYPES));
+    DataType* dataType = m_parseDataType();
     std::vector<Expression*> elements = {};
     m_eat(LBRACE);
     while (m_CurrentToken.type != RBRACE) {
@@ -228,6 +237,38 @@ ListLiteral* Parser::m_parseListLiteral(){
     }
     m_eat(RBRACE);
     return new ListLiteral(elements, dataType);
+}
+
+Expression* Parser::m_handleDataTypeAtom(){
+    // Save current index and token for later restoration
+    int t_index = m_CurrentIndex;
+    std::cout << "T_INDEX: " << t_index << std::endl;
+    
+    // Parse datatype (to be able to determine if it's a list or function literal)
+    m_parseDataType();
+    ListLiteral* (Parser::*listFunc)() = nullptr;
+    Function* (Parser::*funcFunc)() = nullptr;
+    
+    if (m_CurrentToken.type == LBRACE) {
+        std::cout << "GOT LIST LITERAL" << std::endl;
+        listFunc = &Parser::m_parseListLiteral;
+    } else {
+        std::cout << "GOT FUNCTION LITERAL" << std::endl;
+        funcFunc = &Parser::m_parseFunctionLiteral;
+    }
+    
+    // Restore
+    m_CurrentIndex = t_index;
+    m_CurrentToken = m_Tokens[m_CurrentIndex];
+    
+    if (listFunc) {
+        return (this->*listFunc)();
+    } else if (funcFunc) {
+        return (this->*funcFunc)();
+    }
+
+    langError("Unexpected token in HANDLEDATATYPEATOM: " + m_CurrentToken.toString(), m_CurrentToken.line, m_CurrentToken.col);
+    return nullptr;
 }
 
 Expression* Parser::m_parseAtom() {
@@ -247,9 +288,7 @@ Expression* Parser::m_parseAtom() {
         return m_parseVariableAccess();
     }
     else if (std::find(DATA_TYPES.begin(), DATA_TYPES.end(), m_CurrentToken.type) != DATA_TYPES.end()){
-        Token peeked = m_peek();
-        if (peeked.type == LBRACE) return m_parseListLiteral();
-        return m_parseFunctionLiteral();
+        return m_handleDataTypeAtom();
     }
     else if (m_CurrentToken.type == LPAREN){
         m_advance();
@@ -278,7 +317,7 @@ std::vector<ASTNode*> Parser::m_parseBlock() {
 
 VariableDeclaration* Parser::m_parseVariableDeclaration() {
     m_eat(VAR_KEYWORD);
-    DataType* data_type = m_parseDataType(m_eatAny(DATA_TYPES));
+    DataType* data_type = m_parseDataType();
     std::string name = m_eat(IDENTIFIER).value;
     m_eat(EQUAL);
     Expression* value = m_parseExpression();

@@ -27,7 +27,7 @@ private:
     ASTNode* m_genericParse();
     Expression* m_parseExpression(int precedence = 0);
     ASTNode* m_parseNode();
-    DataType* m_parseDataType(Token data_type);
+    DataType* m_parseDataType();
     VariableDeclaration* m_parseVariableDeclaration();
     Expression* m_parseAtom();
     BinaryExpression* m_parseBinaryExpression(Expression left, int precedence);
@@ -41,6 +41,7 @@ private:
     ReturnStatement* m_parseReturnStatement();
     VariableAccess* m_parseVariableAccess();
     ListLiteral* m_parseListLiteral();
+    Expression* m_handleDataTypeAtom();
 };
 
 

@@ -36,7 +36,7 @@ std::string ListLiteral::toString(){
     for (Expression* e: elements){
         result += e->toString() + ", ";
     }
-    return result + "))";
+    return result + ", type=" + dataType->toString() +"))";
 }
 
 IntegerLiteral::IntegerLiteral(int value) : value(value) {}
