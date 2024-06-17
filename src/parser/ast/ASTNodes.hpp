@@ -163,6 +163,12 @@ public:
     std::string toString();
 };
 
+class FunctionType : public DataType {
+public:
+    FunctionType();
+    std::string toString();
+};
+
 class StringType : public DataType {
 public:
     StringType();

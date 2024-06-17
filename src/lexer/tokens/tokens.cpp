@@ -20,6 +20,7 @@ std::vector<TOKENTYPE> token_priorities = {
     VOID_TYPE,
     NONE_TYPE,
     LIST_TYPE,
+    FUNCTION_TYPE,
     // ----- Literals -----
     BOOL,
     INTEGER,
@@ -97,6 +98,7 @@ std::map<int, std::string> token_regexes = {
     {GREATER_EQUAL, ">="},
     {VAR_KEYWORD, "var"},
     {RETURN_KEYWORD, "ret"},
+    {FUNCTION_TYPE, "fn"},
 };
 
 
@@ -144,7 +146,8 @@ std::map<int, std::string> token_strings = {
     {VAR_KEYWORD, "VAR_KEYWORD"},
     {RETURN_KEYWORD, "RETURN_KEYWORD"},
     {WITH_KEYWORD, "WITH_KEYWORD"},
-    {LIST_TYPE, "LIST_TYPE"}
+    {LIST_TYPE, "LIST_TYPE"},
+    {FUNCTION_TYPE, "FUNCTION_TYPE"}
 };
 
 std::vector<TOKENTYPE> DATA_TYPES = {
@@ -154,7 +157,8 @@ std::vector<TOKENTYPE> DATA_TYPES = {
     BOOL_TYPE, 
     VOID_TYPE, 
     NONE_TYPE,
-    LIST_TYPE
+    LIST_TYPE,
+    FUNCTION_TYPE
 };
 
 std::vector<TOKENTYPE> ATOMS = {

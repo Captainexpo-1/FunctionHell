@@ -23,6 +23,7 @@ std::map<TOKENTYPE, int> ORDER_OF_OPERATIONS = {
 
 Parser::Parser() {
     m_CurrentIndex = 0;
+    m_functionMap = {};
 }
 
 Program* Parser::parse(std::vector<Token> tokens) {
@@ -100,11 +101,12 @@ Program* Parser::m_parseProgram() {
 
 std::vector<FunctionParameter*> Parser::m_parseFunctionParams() {
     std::vector<FunctionParameter*> params = {};
+
     while (m_CurrentToken.type != GREATER) {
         DataType* dataType = m_parseDataType();
         std::string name = m_eat(IDENTIFIER).value; 
         params.push_back(new FunctionParameter(name, dataType));
-        if (m_CurrentToken.type != GREATER) m_eat(COMMA);
+        m_mightEat(COMMA);
     }
     return params;
 }
@@ -135,20 +137,27 @@ ASTNode* Parser::m_handleName() {
 
 ASTNode* Parser::m_parseNode() {
     if (m_CurrentToken.type == VAR_KEYWORD) {
-        return m_parseVariableDeclaration();
+        ASTNode* n = m_parseVariableDeclaration();
+        m_eat(NEWLINE);
+        return n;
     }
     else if(m_CurrentToken.type == IF_KEYWORD) {
         //std::cout << "PARSING IF STATEMENT" << std::endl;
-        return m_parseIfStatement();
+        ASTNode* n = m_parseIfStatement();
+        m_eat(NEWLINE);
+        return n;
     }
     else if (m_CurrentToken.type == IDENTIFIER){
-        return m_parseVariableAccess();
+        ASTNode* n =  m_parseExpression();
+        return n;
     }
     else if (std::find(ATOMS.begin(), ATOMS.end(), m_CurrentToken.type) != ATOMS.end()){
         return m_parseExpression();
     }
     else if (m_CurrentToken.type == RETURN_KEYWORD){
-        return m_parseReturnStatement();
+        ASTNode* n = m_parseReturnStatement();
+        m_eat(NEWLINE);
+        return n;
     }
     else if (m_CurrentToken.type == NEWLINE){
         m_eat(NEWLINE);
@@ -181,6 +190,8 @@ DataType* Parser::m_parseDataType() {
             return new BoolType();
         case VOID_TYPE:
             return new VoidType();
+        case FUNCTION_TYPE:
+            return new FunctionType();
         case LIST_TYPE: {
             DataType* innerType;
             {
@@ -191,7 +202,7 @@ DataType* Parser::m_parseDataType() {
             return new ListType(innerType);
         }
         default:
-            langError("Unexpected data type: " + token_strings[type], t.line, t.col);
+            langError("Unimplemented data type: " + token_strings[type], t.line, t.col);
     }
     return nullptr;
 }
@@ -207,7 +218,9 @@ std::vector<Expression*> Parser::m_parseFunctionCallArgs() {
     m_eat(LPAREN);
     while (m_CurrentToken.type != RPAREN) {
         args.push_back(m_parseExpression());
-        if (m_CurrentToken.type != RPAREN) m_eat(COMMA);
+        m_skipWhitespace();
+        m_mightEat(COMMA);
+    
     }
     m_eat(RPAREN);
     return args;
@@ -275,6 +288,10 @@ Expression* Parser::m_parseAtom() {
     if (m_CurrentToken.type == INTEGER){
         return new IntegerLiteral(std::stoi(m_eat(INTEGER).value));
     }
+    if (m_CurrentToken.type == NEWLINE){
+        m_eat(NEWLINE);
+        return m_parseAtom();
+    }
     else if (m_CurrentToken.type == FLOAT){
         return new FloatLiteral(std::stof(m_eat(FLOAT).value));
     }
@@ -321,6 +338,7 @@ VariableDeclaration* Parser::m_parseVariableDeclaration() {
     std::string name = m_eat(IDENTIFIER).value;
     m_eat(EQUAL);
     Expression* value = m_parseExpression();
+    m_functionMap[name] = value;
     return new VariableDeclaration(name, data_type, value);
 }
 

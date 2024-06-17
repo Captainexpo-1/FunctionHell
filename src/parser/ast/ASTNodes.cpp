@@ -151,6 +151,10 @@ std::string FloatType::toString() {
     return "float";
 }
 
+FunctionType::FunctionType() {}
+std::string FunctionType::toString(){
+    return "function";
+}
 StringType::StringType() {}
 
 std::string StringType::toString() {
