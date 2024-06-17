@@ -3,6 +3,7 @@
 #include "./src/lexer/lexer.hpp"
 #include "./src/parser/parser.hpp"
 #include "./src/errors/error.hpp"
+#include "./src/transpiler/transpiler.hpp"
 
 std::string readFile(const char* filename)
 {
@@ -29,5 +30,10 @@ int main(int argc, char** argv) {
     std::vector<Token> tokens = lexer.tokenize(source);
     Program* program = parser.parse(tokens);
     program->print();
+    std::cout << "------------------ Transpiling ------------------\n\n" << std::endl;
+    Transpiler transpiler;
+    std::string output = transpiler.transpile(program->statements);
+    std::cout << output << std::endl;
+
     return 0;
 }

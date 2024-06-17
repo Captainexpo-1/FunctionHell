@@ -11,5 +11,6 @@ var fn foo = fn <> {
 }
 
 // calling this function treats the a and b as their values in it's previous scope
+
 var fn x = foo with ()
 x with (1, 2) == 2

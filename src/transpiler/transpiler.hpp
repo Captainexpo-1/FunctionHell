@@ -3,16 +3,12 @@
 
 #include <string>
 #include <vector>
-#include <map>
-#include <../../parser/ast/ASTNodes.hpp>
-#include <../../lexer/tokens/tokens.hpp>
-
+#include "../parser/ast/ASTNodes.hpp"
 
 class Transpiler {
 public:
     Transpiler();
-    std::string transpile(std::vector<ASTNode*> tree);
-
+    std::string transpile(std::vector<ASTNode*> statements);
 private:
     std::string m_output;
     std::string m_genericTranspile(ASTNode* node);
@@ -20,5 +16,4 @@ private:
     std::string m_transpileExpression(Expression* expression);
 };
 
-
-#endif // TRANSPILER
+#endif
