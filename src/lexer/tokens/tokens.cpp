@@ -15,6 +15,7 @@ std::vector<TOKENTYPE> token_priorities = {
     RETURN_KEYWORD,
     // ----- Types -----
     FLOAT_TYPE,
+    STRING_TYPE,
     INTEGER_TYPE,
     BOOL_TYPE,
     VOID_TYPE,

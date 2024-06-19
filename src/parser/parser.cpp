@@ -142,21 +142,18 @@ ASTNode* Parser::m_parseNode() {
         return n;
     }
     else if(m_CurrentToken.type == IF_KEYWORD) {
-        //std::cout << "PARSING IF STATEMENT" << std::endl;
         ASTNode* n = m_parseIfStatement();
-        m_eat(NEWLINE);
         return n;
     }
     else if (m_CurrentToken.type == IDENTIFIER){
-        ASTNode* n =  m_parseExpression();
-        return n;
+        return m_parseExpression();
     }
     else if (std::find(ATOMS.begin(), ATOMS.end(), m_CurrentToken.type) != ATOMS.end()){
         return m_parseExpression();
     }
     else if (m_CurrentToken.type == RETURN_KEYWORD){
         ASTNode* n = m_parseReturnStatement();
-        m_eat(NEWLINE);
+        //m_eat(NEWLINE);
         return n;
     }
     else if (m_CurrentToken.type == NEWLINE){
@@ -175,36 +172,41 @@ VariableAssignment* Parser::m_parseVariableAssignment() {
     Expression* value = m_parseExpression();
     return new VariableAssignment(name, value);
 }
+DataType* Parser::m_rawParseDataType(TOKENTYPE type){
+    switch(type){
+            case INTEGER_TYPE:
+                return new IntegerType();
+            case FLOAT_TYPE:
+                return new FloatType();
+            case STRING_TYPE:
+                return new StringType();
+            case BOOL_TYPE:
+                return new BoolType();
+            case VOID_TYPE:
+                return new VoidType();
+            case FUNCTION_TYPE:
+                return new FunctionType();
+            default:
+                return nullptr;
 
+        }
+}
 DataType* Parser::m_parseDataType() {
+    // Special case for lists
+    if (m_peek().type == LBRACKET){
+        //List type, form: type[]
+        DataType* dt = m_rawParseDataType(m_eatAny(DATA_TYPES).type);
+        m_eat(LBRACKET);
+        m_eat(RBRACKET);
+        return new ListType(dt);
+    }
+
     Token t = m_eatAny(DATA_TYPES);
     TOKENTYPE type = t.type;
-    switch(type){
-        case INTEGER_TYPE:
-            return new IntegerType();
-        case FLOAT_TYPE:
-            return new FloatType();
-        case STRING_TYPE:
-            return new StringType();
-        case BOOL_TYPE:
-            return new BoolType();
-        case VOID_TYPE:
-            return new VoidType();
-        case FUNCTION_TYPE:
-            return new FunctionType();
-        case LIST_TYPE: {
-            DataType* innerType;
-            {
-                innerType = m_parseDataType();
-            }
-            std::cout << "GOT INNER TYPE: " << innerType->toString() << std::endl;
-            std::cout << "CURTOKEN"<< m_CurrentToken.toString() << std::endl;
-            return new ListType(innerType);
-        }
-        default:
-            langError("Unimplemented data type: " + token_strings[type], t.line, t.col);
-    }
-    return nullptr;
+
+    DataType* d = m_rawParseDataType(type);
+    if (d == nullptr) langError("Unimplemented data type: " + token_strings[type], t.line, t.col);
+    return d;
 }
 
 ReturnStatement* Parser::m_parseReturnStatement() {
@@ -254,26 +256,22 @@ ListLiteral* Parser::m_parseListLiteral(){
 
 Expression* Parser::m_handleDataTypeAtom(){
     // Save current index and token for later restoration
-    int t_index = m_CurrentIndex;
-    std::cout << "T_INDEX: " << t_index << std::endl;
-    
+    int t_index = m_CurrentIndex;   
+
     // Parse datatype (to be able to determine if it's a list or function literal)
     m_parseDataType();
     ListLiteral* (Parser::*listFunc)() = nullptr;
     Function* (Parser::*funcFunc)() = nullptr;
     
     if (m_CurrentToken.type == LBRACE) {
-        std::cout << "GOT LIST LITERAL" << std::endl;
         listFunc = &Parser::m_parseListLiteral;
     } else {
-        std::cout << "GOT FUNCTION LITERAL" << std::endl;
         funcFunc = &Parser::m_parseFunctionLiteral;
     }
     
     // Restore
     m_CurrentIndex = t_index;
     m_CurrentToken = m_Tokens[m_CurrentIndex];
-    
     if (listFunc) {
         return (this->*listFunc)();
     } else if (funcFunc) {

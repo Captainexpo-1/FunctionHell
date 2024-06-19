@@ -38,6 +38,7 @@ private:
 
     // Intermediate
     DataType* m_parseDataType();
+    DataType* m_rawParseDataType(TOKENTYPE type);
     std::vector<FunctionParameter*> m_parseFunctionParams();
     std::vector<Expression*> m_parseFunctionCallArgs();
     std::vector<ASTNode*> m_parseBlock();

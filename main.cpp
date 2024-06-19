@@ -19,9 +19,20 @@ std::string readFile(const char* filename)
 
 
 int main(int argc, char** argv) {
+    char* output_file = NULL;
     if (argc < 2 || argc == 0){
         std::cerr << "Usage: " << argv[0] << " <filename>" << std::endl;
         exit(1);
+    }
+    for(int i = 0; i < argc; i++){
+        if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0){
+            std::cout << "Usage: " << argv[0] << " <filename>" << std::endl;
+            exit(0);
+        }
+        else if(strcmp(argv[i], "-o") == 0){
+            output_file = argv[i+1];
+            
+        }
     }
     Lexer lexer;
     Parser parser;
@@ -30,10 +41,20 @@ int main(int argc, char** argv) {
     std::vector<Token> tokens = lexer.tokenize(source);
     Program* program = parser.parse(tokens);
     program->print();
-    std::cout << "------------------ Transpiling ------------------\n\n" << std::endl;
+    std::cout << "------------------ Transpiling ------------------\n" << std::endl;
     Transpiler transpiler;
     std::string output = transpiler.transpile(program->statements);
-    std::cout << output << std::endl;
+    if(output_file != NULL){
+        std::ofstream file(output_file);
+        file << output;
+        file.close();
+    }
+    else{
+        // Output to default file
+        std::ofstream file("output.js");
+        file << output;
+        file.close();
+    }
 
     return 0;
 }

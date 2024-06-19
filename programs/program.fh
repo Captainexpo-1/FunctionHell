@@ -1,16 +1,19 @@
-var fn foo = fn <> {
-    var int a = int <> {
-        ret 3
+var void fizzbuzz = void <int n, int j> {
+    if (j % 15 == 0) {
+        log with ("FizzBuzz")
     }
-    var int b = int <> {
-        ret 2
+    else if (j % 5 == 0){
+        log with ("Buzz")
     }
-    ret int <int c, int d> {
-        ret a * (c + d) / b
+    else if (j % 3 == 0){
+        log with ("Fizz")
+    }
+    else {
+        log with (j)
+    }
+    if (j < n) {
+        fizzbuzz with (int <> { ret n } , int <> { ret j + 1 })
     }
 }
 
-// calling this function treats the a and b as their values in it's previous scope
-
-var fn x = foo with ()
-x with (1, 2) == 2
+fizzbuzz with (int <> { ret 100 }, int <> { ret 0 })

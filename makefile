@@ -38,8 +38,7 @@ reset:
 	mkdir -p $(OUTPUT_DIR)/obj/errors
 	mkdir -p $(OUTPUT_DIR)/obj/parser
 	mkdir -p $(OUTPUT_DIR)/obj/parser/ast
-	mkdir -p $(OUTPUT_DIR)/obj/backend
-	mkdir -p $(OUTPUT_DIR)/obj/backend/transpiler
+	mkdir -p $(OUTPUT_DIR)/obj/transpiler
 
 
 
