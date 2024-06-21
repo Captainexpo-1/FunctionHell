@@ -70,7 +70,7 @@ int main(int argc, char** argv) {
     Program* program = runParser(tokens);
     
     TypeChecker typeChecker;
-    int r = typeChecker.checkTypes(program->statements, nullptr);
+    int r = typeChecker.checkTypes(program->statements, nullptr, nullptr);
     if (r == 1) {
         std::cerr << "Type checking failed..." << std::endl;
         return 1;

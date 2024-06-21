@@ -18,7 +18,7 @@ struct Scope {
 class TypeChecker {
 public:
     TypeChecker();
-    int checkTypes(std::vector<ASTNode*> statements, Scope* scope); // Returns 0 if no errors, 1 if errors
+    int checkTypes(std::vector<ASTNode*> statements, Scope* scope, DataType* returnType); // Returns 0 if no errors, 1 if errors
     void printScope(Scope* scope);
 private:
     template <typename T> 

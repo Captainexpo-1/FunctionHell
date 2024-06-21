@@ -24,7 +24,7 @@ DataType* TypeChecker::m_findInScope(std::string name, Scope* scope) {
     return nullptr;
 }
 
-int TypeChecker::checkTypes(std::vector<ASTNode*> statements, Scope* scope) {
+int TypeChecker::checkTypes(std::vector<ASTNode*> statements, Scope* scope, DataType* returnType) {
     bool foundReturn = false;
     if (scope == nullptr){
         scope = m_globalScope;
@@ -56,9 +56,8 @@ int TypeChecker::checkTypes(std::vector<ASTNode*> statements, Scope* scope) {
                             std::cout << "Variable added: " << fp->name << " " << fp->type->toString() << std::endl;
                         }
                         // Recursively type check the function
-                        std::cout << "CHECKING FUNCTION BODY" << std::endl;
                         printScope(funcScope);
-                        int a = checkTypes(f->body, funcScope);
+                        int a = checkTypes(f->body, funcScope, f->returnType);
                         if (a != 0){
                             return a;
                         }
@@ -104,12 +103,10 @@ int TypeChecker::checkTypes(std::vector<ASTNode*> statements, Scope* scope) {
                 for (FunctionParameter* fp : f->params){
                     funcScope->variables[fp->name] = fp->type;
                     funcScope->var_names.push_back(fp->name);
-                    std::cout << "Variable added: " << fp->name << " " << fp->type->toString() << std::endl;
                 }
                 // Recursively type check the function
-                std::cout << "CHECKING FUNCTION BODY" << std::endl;
                 printScope(funcScope);
-                int a = checkTypes(f->body, funcScope);
+                int a = checkTypes(f->body, funcScope, f->returnType);
                 if (a != 0){
                     return a;
                 }
@@ -135,6 +132,10 @@ int TypeChecker::checkTypes(std::vector<ASTNode*> statements, Scope* scope) {
             rs->toString();
             foundReturn = true;
         }
+    }
+    if (!foundReturn && returnType != nullptr && returnType->toString() != "void"){
+        std::cout << "Error: Non-void function of return type " << returnType->toString() << " does not return a value" << std::endl;
+        return 1;
     }
     //printScope(scope);
     return 0;
