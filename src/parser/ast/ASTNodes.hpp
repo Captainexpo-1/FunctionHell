@@ -101,7 +101,7 @@ public:
 	std::string toJS();
 };
 
-class VariableAssignment : public Statement {
+class VariableAssignment : public Expression {
 public:
     std::string name;
     Expression* value;

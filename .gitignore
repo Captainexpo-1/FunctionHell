@@ -3,3 +3,4 @@ python/
 bin/
 bin/*
 output/
+node_modules/

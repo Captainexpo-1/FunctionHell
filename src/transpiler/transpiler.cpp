@@ -7,30 +7,23 @@ Transpiler::Transpiler() {
 void Transpiler::m_addStd(){
     m_output += 
     // functions
-    /*
-- `parseint`: Converts a string to an integer
-- `parsefloat`: Converts a string to a float
-- `len`: Returns the length of a string or list
-- `str`: Converts a number to a string
-- `round`: Rounds a float to the nearest integer
-- `floor`: Rounds a float down to the nearest integer
-- `ceil`: Rounds a float up to the nearest integer
-    
-    */
+    "declare function require(name:string);"
     "const __fs__ = require('fs');"
     "var fileRead=(path)=>__fs__.readFileSync(path, 'utf8');"
     "var fileWrite=(path, data)=>{try { __fs__.writeFileSync('output.txt', data, 'utf8'); console.log('File has been written'); } catch (err) { console.error('Error writing to file:', err); }};"
     "var varErr=()=>console.error('Variable is not a function');"
     "var log=(...args)=>console.log(...args);"
-    "var at=(x, index)=>{x()[index];};"
-    "var sin=(x)=>Math.sin(x); var cos=(x)=>Math.cos(x); var tan=(x)=>Math.tan(x);"
-    "var abs=(x)=>x() > 0 ? x() : -x();"
-    "var parseint=(x)=>parseInt(x());"
-    "var parsefloat=(x)=>parseFloat(x());"
-    "var len=(x)=>x().length;"
-    "var str=(x)=>x().toString();"
+    "var at: () => any =(x, index)=>{x()[index];};"
+    "var sin: () => number =(x)=>Math.sin(x);" 
+    "var cos: () => number =(x)=>Math.cos(x);" 
+    "var tan: () => number =(x)=>Math.tan(x);"
+    "var abs: () => number =(x)=>x() > 0 ? x() : -x();"
+    "var parseint: () => number =(x)=>parseInt(x());"
+    "var parsefloat: () => number =(x)=>parseFloat(x());"
+    "var len: () => number =(x)=>x().length;"
+    "var str: () => string =(x)=>x().toString();"
     // constants
-    "var PI=()=>3.14159265;";
+    "var PI:() => number =()=>3.14159265;";
 }
 
 

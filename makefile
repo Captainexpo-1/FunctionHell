@@ -6,7 +6,7 @@ CFLAGS = -Wall -Wextra -std=c++11
 
 SRCS = ../main.cpp ./lexer/lexer.cpp ./lexer/tokens/tokens.cpp ./errors/error.cpp ./parser/ast/ASTNodes.cpp ./parser/parser.cpp ./transpiler/transpiler.cpp
 OBJS = $(addprefix $(OUTPUT_DIR)/obj/,$(SRCS:.cpp=.o))
-PROGRAM_NAME = fh
+PROGRAM_NAME = lpp-c 
 # Target executable
 SRC_DIR = src
 OUTPUT_DIR = bin

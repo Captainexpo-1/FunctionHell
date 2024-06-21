@@ -119,7 +119,7 @@ VariableDeclaration::VariableDeclaration(std::string name, DataType* type, Expre
 
 std::string VariableDeclaration::toJS() {
     //return "let " + name + ": () => " + type->toJS() + " = "  + value->toJS();
-    return "let " + name + " = "  + value->toJS() + ";if (typeof " + name + " !== 'function') varErr();";
+    return "let " + name + ": () => " + type->toJS() + " = "  + value->toJS() + ";";
 }
 
 std::string VariableDeclaration::toString() {
@@ -173,7 +173,7 @@ std::string FunctionParameter::toString() {
 VariableAssignment::VariableAssignment(std::string name, Expression* value) : name(name), value(value) {}
 
 std::string VariableAssignment::toJS() {
-    return name + " = " + value->toJS() + ";if (typeof " + name + " !== 'function') varErr();";
+    return name + " = " + value->toJS() + ";";
 }
 
 std::string VariableAssignment::toString() {
@@ -252,6 +252,9 @@ std::string BinaryExpression::toJS() {
     bool useParens = true;
     if (op[0] == '=' || op == "!=" || op[0] == '>' || op[0] == '<')
         useParens = false;
+    if (op == "="){
+        return left->toJS() + " = " + right->toJS();
+    }
     return (useParens ? "(" : "") + left->toJS() + " " + op + " " + right->toJS() + (useParens ? ")" : "");
 }
 
@@ -282,7 +285,7 @@ std::string FloatType::toString() {
 
 FunctionType::FunctionType() {}
 std::string FunctionType::toJS(){
-    return "Function";
+    return "() => any";
 }
 
 std::string FunctionType::toString(){
@@ -321,7 +324,7 @@ std::string VoidType::toString() {
 ListType::ListType(DataType* subType) : subType(subType) {};
 
 std::string ListType::toJS(){
-    return "any";
+    return subType->toJS() + "[]";
 }
 
 std::string ListType::toString(){

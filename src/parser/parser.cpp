@@ -8,7 +8,7 @@ std::map<TOKENTYPE, int> ORDER_OF_OPERATIONS = {
     {STAR, 20},
     {SLASH, 20},
     {PERCENT, 20},
-    {EQUAL, 5},
+    //{EQUAL, 5},
     {EQUAL_EQUAL, 5},
     {BANG_EQUAL, 5},
     {LESS, 5},
@@ -300,6 +300,9 @@ Expression* Parser::m_parseAtom() {
         return new BooleanLiteral(m_eat(BOOL).value == "true");
     }
     else if (m_CurrentToken.type == IDENTIFIER){
+        if (m_peek().type == EQUAL){
+            return m_parseVariableAssignment();
+        }
         return m_parseVariableAccess();
     }
     else if (std::find(DATA_TYPES.begin(), DATA_TYPES.end(), m_CurrentToken.type) != DATA_TYPES.end()){
