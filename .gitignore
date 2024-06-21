@@ -4,3 +4,12 @@ bin/
 bin/*
 output/
 node_modules/
+backup/
+build/
+
+# Cmake
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+*.cmake

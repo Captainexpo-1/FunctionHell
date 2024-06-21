@@ -1,9 +1,10 @@
 #include <iostream>
 #include <fstream>
-#include "./src/lexer/lexer.hpp"
-#include "./src/parser/parser.hpp"
-#include "./src/errors/error.hpp"
-#include "./src/transpiler/transpiler.hpp"
+#include "./lexer/lexer.hpp"
+#include "./parser/parser.hpp"
+#include "./errors/error.hpp"
+#include "./transpiler/transpiler.hpp"
+#include "./typeChecker/typeChecker.hpp"
 
 std::string readFile(const char* filename)
 {
@@ -27,15 +28,22 @@ void runCMD(const char* cmd){
     std::cout << cmd << std::endl;
     system(cmd);
 }
+std::vector<Token> runTokenizer(std::string source){
+    Lexer lexer;
+    return lexer.tokenize(source);
+}
+Program* runParser(std::vector<Token> tokens){
+    Parser parser;
+    Program* program = parser.parse(tokens);
+    return program;
+}
 
 int main(int argc, char** argv) {
     char* output_file = "output.ts";
     bool runOutput = false;
     bool rmJSOut = true;
-    if (argc < 2 || argc == 0){
-        printHelp(argv);
-        exit(1);
-    }
+    bool doTranspile = true;
+    if (argc < 2 || argc == 0) { printHelp(argv); exit(1); }
     for(int i = 0; i < argc; i++){
         if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0){
             printHelp(argv);
@@ -51,24 +59,33 @@ int main(int argc, char** argv) {
         else if(strcmp(argv[i], "-noRm") == 0){
             rmJSOut = false;
         }
+        else if (strcmp(argv[i], "-noTranspile") == 0){
+            doTranspile = false;
+            std::cout << "Transpilation disabled" << std::endl;
+        }
     }
-    Lexer lexer;
-    Parser parser;
     std::string source = readFile(argv[1]);
     setSource(source);
-    std::vector<Token> tokens = lexer.tokenize(source);
-    Program* program = parser.parse(tokens);
-    //program->print();
-    //std::cout << "------------------ Transpiling ------------------\n" << std::endl;
+    std::vector<Token> tokens = runTokenizer(source);
+    Program* program = runParser(tokens);
+    
+    TypeChecker typeChecker;
+    int r = typeChecker.checkTypes(program->statements, nullptr);
+    if (r == 1) {
+        std::cerr << "Type checking failed..." << std::endl;
+        return 1;
+    }
+    
+
+
+    if (!doTranspile) return 0;
     Transpiler transpiler;
     std::string output = transpiler.transpile(program->statements);
 
     std::ofstream file(output_file);
     file << output;
     file.close();
-    //std::cout << "Transpiled code written to " << output_file << std::endl;
-    if (runOutput){
-    
+    if (runOutput ){
         runCMD(("tsc " + std::string(output_file)).c_str());
         std::string o_file = std::string(output_file).substr(0, std::string(output_file).size()-3) + ".js"; 
         runCMD(("node " + o_file).c_str());

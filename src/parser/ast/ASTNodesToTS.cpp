@@ -47,6 +47,7 @@ std::string BooleanLiteral::toJS() {
 
 std::string VariableDeclaration::toJS() {
     std::string args = "";
+    std::string valJs = "";
     if (value != nullptr){
         if (dynamic_cast<Function*>(value) != nullptr){
             std::vector<FunctionParameter*> params = dynamic_cast<Function*>(value)->params;
@@ -55,15 +56,21 @@ std::string VariableDeclaration::toJS() {
             for(FunctionParameter* param: params){
                 std::string a = param->toJS() + ", ";
                 args += a;
-                std::cout << a << std::endl;
             }
             args += ")";
+
+            valJs = value->toJS();
         }
         else{
+            if(dynamic_cast<VariableAccess*>(value) == nullptr)
+                // This is bad
+                return "Holy hell";
+            VariableAccess* va = dynamic_cast<VariableAccess*>(value);
+            valJs = va->name;
             args = "()";
         }
     }
-    return "let " + name + ": " + args + " => " + type->toJS() + " = "  + value->toJS() + ";";
+    return "let " + name/* + ": " + args + " => " + type->toJS()*/ + " = "  + valJs + ";";
 }
 
 std::string Function::toJS(){
@@ -86,7 +93,15 @@ std::string FunctionParameter::toJS() {
 
 
 std::string VariableAssignment::toJS() {
-    return name + " = " + value->toJS() + ";";
+    std::string valJs = "";
+    if(dynamic_cast<VariableAccess*>(value) != nullptr){
+        VariableAccess* va = dynamic_cast<VariableAccess*>(value);
+        valJs = va->name;
+    }else{
+        valJs = value->toJS();
+    }
+
+    return name + " = " + valJs + ";";
 }
 
 

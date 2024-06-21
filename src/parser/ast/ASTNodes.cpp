@@ -152,7 +152,7 @@ std::string IntegerType::toJS(){
     return "number";
 }
 std::string IntegerType::toString() {
-    return "string";
+    return "int";
 }
 FloatType::FloatType() {}
 
