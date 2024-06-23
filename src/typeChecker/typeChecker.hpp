@@ -25,6 +25,10 @@ private:
     bool m_isType(ASTNode* node);
     DataType* m_findInScope(std::string name, Scope* scope);
     Scope* m_globalScope;
+    DataType* m_getExpression(ASTNode* node, Scope* scope);
+    DataType* m_checkBinaryExpression(BinaryExpression* node, Scope* scope);
+    DataType* m_literalType(ASTNode* node, Scope* scope);
+    DataType* m_evalOperation(DataType* d1, DataType* d2);
 };
 
 #include "typeChecker.inl"

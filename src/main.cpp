@@ -59,7 +59,7 @@ int main(int argc, char** argv) {
         else if(strcmp(argv[i], "-noRm") == 0){
             rmJSOut = false;
         }
-        else if (strcmp(argv[i], "-noTranspile") == 0){
+        else if (strcmp(argv[i], "--noTranspile") == 0){
             doTranspile = false;
             std::cout << "Transpilation disabled" << std::endl;
         }
@@ -71,8 +71,8 @@ int main(int argc, char** argv) {
     
     TypeChecker typeChecker;
     int r = typeChecker.checkTypes(program->statements, nullptr, nullptr);
-    if (r == 1) {
-        std::cerr << "Type checking failed..." << std::endl;
+    if (r != 0) {
+        std::cout << "Type checking failed..." << std::endl;
         return 1;
     }
     

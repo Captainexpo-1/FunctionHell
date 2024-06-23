@@ -63,11 +63,12 @@ std::string VariableDeclaration::toJS() {
         }
         else{
             if(dynamic_cast<VariableAccess*>(value) == nullptr)
-                // This is bad
-                return "Holy hell";
-            VariableAccess* va = dynamic_cast<VariableAccess*>(value);
-            valJs = va->name;
-            args = "()";
+                valJs = value->toJS();
+            else{
+                VariableAccess* va = dynamic_cast<VariableAccess*>(value);
+                valJs = va->name;
+                args = "()";
+            }
         }
     }
     return "let " + name/* + ": " + args + " => " + type->toJS()*/ + " = "  + valJs + ";";
