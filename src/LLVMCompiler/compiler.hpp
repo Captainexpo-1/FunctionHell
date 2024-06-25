@@ -22,9 +22,10 @@ public:
     void compile(Program* program);
     void printModule();
 private:
+    uint curLambda = 0;
+    std::map<std::string, uint> lambdaMap;
+    std::map<std::string, llvm::Type*> typeMap;
     // Recursive function to compile ASTNodes
-    
-
     llvm::Value* compileNode(ASTNode* node);
     llvm::Value* compileBinaryExpression(BinaryExpression* node);
     llvm::Value* compileIntegerLiteral(IntegerLiteral* node);

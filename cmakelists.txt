@@ -14,7 +14,6 @@ set(CMAKE_C_COMPILER "/usr/bin/gcc")
 set(CMAKE_CXX_COMPILER "/usr/bin/g++")
 
 # Find LLVM package
-set(LLVM_DIR "/usr/local/opt/llvm/lib/cmake/llvm")
 find_package(LLVM REQUIRED CONFIG)
 
 # Print out the LLVM version and libraries

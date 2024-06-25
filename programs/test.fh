@@ -1,4 +1,6 @@
-var int a = 2
 var int x = int <> {
-    ret ^a
+    ret 2
+}
+var int y = int <> {
+    ret ^x
 }
