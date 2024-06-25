@@ -116,8 +116,16 @@ Function* Parser::m_parseFunctionLiteral() {
     m_eat(LESS);
     std::vector<FunctionParameter*> params = m_parseFunctionParams();
     m_eat(GREATER);
+    m_functionCaptures.push_back({});
     std::vector<ASTNode*> body = m_parseBlock();
-    return new Function(params, dataType, body);
+    Function* fn = new Function(params, dataType, body);
+    fn->captures = m_functionCaptures[m_functionCaptures.size()-1];
+    for(VariableCaptureAccess* vcc : fn->captures){
+        std::cout << "CAPTURED: " << vcc->toString();
+    }
+    std::cout << std::endl;
+    m_functionCaptures.pop_back();
+    return fn;
 }
 
 Expression* Parser::m_parseExpression(int precedence) {
@@ -285,10 +293,18 @@ Expression* Parser::m_handleDataTypeAtom(){
 Expression* Parser::m_parseAtom() {
     if (m_CurrentToken.type == INTEGER){
         return new IntegerLiteral(std::stoi(m_eat(INTEGER).value));
-    }
-    if (m_CurrentToken.type == NEWLINE){
+    } 
+    else if (m_CurrentToken.type == NEWLINE){
         m_eat(NEWLINE);
         return m_parseAtom();
+    }
+    else if (m_CurrentToken.type == CARAT){
+        // Variable capture
+        m_eat(CARAT);
+        VariableAccess* acc = m_parseVariableAccess();
+        VariableCaptureAccess* vcc = new VariableCaptureAccess(acc);
+        m_functionCaptures[m_functionCaptures.size()-1].push_back(vcc);
+        return vcc;
     }
     else if (m_CurrentToken.type == FLOAT){
         return new FloatLiteral(std::stof(m_eat(FLOAT).value));

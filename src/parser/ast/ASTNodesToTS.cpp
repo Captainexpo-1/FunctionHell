@@ -127,6 +127,10 @@ std::string IfStatement::toJS() {
     return o;
 }
 
+std::string VariableCaptureAccess::toJS() {
+    return access->toJS();
+}
+
 std::string VariableAccess::toJS() {
     std::string o = name + "(";
     for(Expression* arg: args){

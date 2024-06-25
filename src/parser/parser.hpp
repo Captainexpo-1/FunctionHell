@@ -42,6 +42,7 @@ private:
     std::vector<FunctionParameter*> m_parseFunctionParams();
     std::vector<Expression*> m_parseFunctionCallArgs();
     std::vector<ASTNode*> m_parseBlock();
+
     
     // Literals
     ListLiteral* m_parseListLiteral();
@@ -53,7 +54,7 @@ private:
     Expression* m_handleDataTypeAtom();
     
     // Specific expressions
-    BinaryExpression* m_parseBinaryExpression(Expression left, int precedence);
+    BinaryExpression* m_parseBinaryExpression(Expression* left, int precedence);
     VariableAccess* m_parseVariableAccess();
 
     // Statements     
@@ -68,7 +69,7 @@ private:
     Token m_CurrentToken;
     int m_CurrentIndex;
     std::vector<Token> m_Tokens;
-    
+    std::vector<std::vector<VariableCaptureAccess*>> m_functionCaptures;
 };
 
 

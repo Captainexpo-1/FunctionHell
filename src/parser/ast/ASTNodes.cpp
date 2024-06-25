@@ -80,18 +80,15 @@ std::string VariableDeclaration::toString() {
 Function::Function(std::vector<FunctionParameter*> params, DataType* returnType, std::vector<ASTNode*> body) : params(params), returnType(returnType), body(body) {}
 
 std::string Function::toString() {
-    std::string o = "(";
-    // To define functions in TypeScript, you can use the following syntax:
-    // (args): type => { body }
+    std::string o = "Function(params=(";
     for(FunctionParameter* param: params){
-        o += param->toString() + ",";
+        o += param->toString() + ", ";
     }
-    o += "): " + returnType->toString() + " => {";
+    o += "), returnType=" + returnType->toString() + ", body=(";
     for(ASTNode* node: body){
-        o += node->toString() + ",";
+        o += node->toString() + ", ";
     }
-    o += "}";
-
+    o += "))";
     return o;
 }
 
@@ -136,6 +133,13 @@ std::string VariableAccess::toString() {
     o += "))";
     return o;
 }
+
+VariableCaptureAccess::VariableCaptureAccess(VariableAccess* variableAccess) : access(variableAccess) {}
+
+std::string VariableCaptureAccess::toString() {
+    return "VariableCaptureAccess(" + access->toString() + ")";
+}
+
 
 BinaryExpression::BinaryExpression(Expression* left, Expression* right, std::string op) : left(left), op(op), right(right) {}
 

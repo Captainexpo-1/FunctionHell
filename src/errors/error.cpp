@@ -4,6 +4,10 @@ std::string m_Source = "";
 std::vector<std::string> m_SourceLines;
 
 void langError(std::string message, int line, int col) {
+    if (line == -1 && col == -1) {
+        std::cerr << "\e[1;31m" << "Error: " << message << "\e[0m" << std::endl;
+        exit(1);
+    }
     if (m_Source != "") {
         std::cerr << "\e[1;31m" << "Error: " << message << " at line " << line << " column " << col << std::endl;
         std::cerr << m_SourceLines[line-1] << std::endl;

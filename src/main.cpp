@@ -5,6 +5,7 @@
 #include "./errors/error.hpp"
 #include "./transpiler/transpiler.hpp"
 #include "./typeChecker/typeChecker.hpp"
+#include "./LLVMCompiler/compiler.hpp"
 
 std::string readFile(const char* filename)
 {
@@ -38,11 +39,33 @@ Program* runParser(std::vector<Token> tokens){
     return program;
 }
 
+void transpileAST(Program* program, const char* output_file, bool runOutput, bool rmJSOut){
+    Transpiler transpiler;
+    std::string output = transpiler.transpile(program->statements);
+
+    std::ofstream file(output_file);
+    file << output;
+    file.close();
+    if (runOutput ){
+        runCMD(("tsc " + std::string(output_file)).c_str());
+        std::string o_file = std::string(output_file).substr(0, std::string(output_file).size()-3) + ".js"; 
+        runCMD(("node " + o_file).c_str());
+        if(rmJSOut) runCMD(("rm " + o_file).c_str());
+    } 
+}
+
+void compileAST(Program* program, const char* output_file){
+    LLVMCompiler compiler;
+    compiler.compile(program);
+    compiler.printModule();
+}
+
 int main(int argc, char** argv) {
     char* output_file = "output.ts";
     bool runOutput = false;
     bool rmJSOut = true;
-    bool doTranspile = true;
+    bool doTranspile = false;
+    bool doCompile = !doTranspile;
     if (argc < 2 || argc == 0) { printHelp(argv); exit(1); }
     for(int i = 0; i < argc; i++){
         if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0){
@@ -59,9 +82,13 @@ int main(int argc, char** argv) {
         else if(strcmp(argv[i], "-noRm") == 0){
             rmJSOut = false;
         }
-        else if (strcmp(argv[i], "--noTranspile") == 0){
+        else if (strcmp(argv[i], "--transpile") == 0){
             doTranspile = false;
             std::cout << "Transpilation disabled" << std::endl;
+        }
+        else if (strcmp(argv[i], "--noCompile") == 0){
+            doCompile = false;
+            std::cout << "Compilation disabled" << std::endl;
         }
     }
     std::string source = readFile(argv[1]);
@@ -78,20 +105,9 @@ int main(int argc, char** argv) {
     
 
 
-    if (!doTranspile) return 0;
-    Transpiler transpiler;
-    std::string output = transpiler.transpile(program->statements);
+    if (doTranspile) transpileAST(program, output_file, runOutput, rmJSOut);
+    if (doCompile) compileAST(program, output_file);
 
-    std::ofstream file(output_file);
-    file << output;
-    file.close();
-    if (runOutput ){
-        runCMD(("tsc " + std::string(output_file)).c_str());
-        std::string o_file = std::string(output_file).substr(0, std::string(output_file).size()-3) + ".js"; 
-        runCMD(("node " + o_file).c_str());
-        if(rmJSOut) runCMD(("rm " + o_file).c_str());
-    } 
-    return 0;
 }
 
 

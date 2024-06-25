@@ -2,11 +2,16 @@ cmake_minimum_required(VERSION 3.10)
 project(lpp-c)
 
 # Set C++ standard
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Compiler flags
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
+
+# Specify compilers (optional, consider setting these externally)
+set(CMAKE_C_COMPILER "/usr/bin/gcc")
+set(CMAKE_CXX_COMPILER "/usr/bin/g++")
 
 # Find LLVM package
 set(LLVM_DIR "/usr/local/opt/llvm/lib/cmake/llvm")
@@ -32,6 +37,8 @@ set(SRCS
     ${SRC_DIR}/parser/parser.cpp 
     ${SRC_DIR}/transpiler/transpiler.cpp
     ${SRC_DIR}/typeChecker/typeChecker.cpp
+    ${SRC_DIR}/LLVMCompiler/compiler.cpp
+    ${SRC_DIR}/utils/utils.cpp
 )
 
 # Output directories
@@ -51,13 +58,6 @@ target_link_libraries(${PROJECT_NAME} ${llvm_libs})
 # Create necessary directories before linking
 add_custom_command(TARGET ${PROJECT_NAME} PRE_LINK
     COMMAND ${CMAKE_COMMAND} -E make_directory ${OUTPUT_DIR}
-    #COMMAND ${CMAKE_COMMAND} -E make_directory ${OBJECT_DIR}
-    #COMMAND ${CMAKE_COMMAND} -E make_directory ${OBJECT_DIR}/lexer
-    #COMMAND ${CMAKE_COMMAND} -E make_directory ${OBJECT_DIR}/lexer/tokens
-    #COMMAND ${CMAKE_COMMAND} -E make_directory ${OBJECT_DIR}/errors
-    #COMMAND ${CMAKE_COMMAND} -E make_directory ${OBJECT_DIR}/parser
-    #COMMAND ${CMAKE_COMMAND} -E make_directory ${OBJECT_DIR}/parser/ast
-    #COMMAND ${CMAKE_COMMAND} -E make_directory ${OBJECT_DIR}/transpiler
 )
 
 # Set the output directory for the target
@@ -70,6 +70,3 @@ add_custom_target(clean-all
     COMMAND ${CMAKE_COMMAND} -E remove_directory ${OBJECT_DIR}
     COMMAND ${CMAKE_COMMAND} -E remove_directory ${OUTPUT_DIR}
 )
-
-# Add dependencies for the custom clean target
-add_dependencies(${PROJECT_NAME} clean-all)

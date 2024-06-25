@@ -127,16 +127,6 @@ public:
 	std::string toJS();
 };
 
-class Function : public Expression {
-public:
-    std::string name;
-    std::vector<FunctionParameter*> params;
-    std::vector<ASTNode*> body;
-    DataType* returnType;
-    Function(std::vector<FunctionParameter*> params, DataType* returnType, std::vector<ASTNode*> body);
-    std::string toString();
-	std::string toJS();
-};
 
 
 
@@ -149,12 +139,33 @@ public:
 	std::string toJS();
 };
 
+class VariableCaptureAccess : public Expression {
+public:
+    VariableAccess* access;
+    DataType* type;
+    VariableCaptureAccess(VariableAccess* access);
+    std::string toString();
+	std::string toJS();
+};
+
 class BinaryExpression : public Expression {
 public:
     Expression* left;
     Expression* right;
     std::string op;
     BinaryExpression(Expression* left, Expression* right, std::string op);
+    std::string toString();
+	std::string toJS();
+};
+
+class Function : public Expression {
+public:
+    std::string name;
+    std::vector<FunctionParameter*> params;
+    std::vector<ASTNode*> body;
+    DataType* returnType;
+    std::vector<VariableCaptureAccess*> captures;
+    Function(std::vector<FunctionParameter*> params, DataType* returnType, std::vector<ASTNode*> body);
     std::string toString();
 	std::string toJS();
 };

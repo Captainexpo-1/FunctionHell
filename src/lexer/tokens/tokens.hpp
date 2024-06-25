@@ -50,7 +50,9 @@ enum TOKENTYPE {
     GREATER_EQUAL,
     VAR_KEYWORD,
     RETURN_KEYWORD,
-    FUNCTION_TYPE
+    CAPTURED_KEYWORD,
+    FUNCTION_TYPE,
+    CARAT,
 };
 
 extern std::map<int, std::string> token_strings;

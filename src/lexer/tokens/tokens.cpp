@@ -49,6 +49,7 @@ std::vector<TOKENTYPE> token_priorities = {
     SLASH,
     PERCENT,
     BANG,
+    CARAT,
     // ----- Other -----
     IDENTIFIER,
 
@@ -100,6 +101,8 @@ std::map<int, std::string> token_regexes = {
     {VAR_KEYWORD, "var"},
     {RETURN_KEYWORD, "ret"},
     {FUNCTION_TYPE, "fn"},
+    {CAPTURED_KEYWORD, "captured"},
+    {CARAT, "\\^"},
 };
 
 
@@ -148,7 +151,8 @@ std::map<int, std::string> token_strings = {
     {RETURN_KEYWORD, "RETURN_KEYWORD"},
     {WITH_KEYWORD, "WITH_KEYWORD"},
     {LIST_TYPE, "LIST_TYPE"},
-    {FUNCTION_TYPE, "FUNCTION_TYPE"}
+    {FUNCTION_TYPE, "FUNCTION_TYPE"},
+    {CARAT, "CARAT"},
 };
 
 std::vector<TOKENTYPE> DATA_TYPES = {
@@ -169,6 +173,7 @@ std::vector<TOKENTYPE> ATOMS = {
     STRING, 
     BOOL, 
     LPAREN,
+    CARAT // For capturing variables: ^identifier (this indicates a captured variable, it being in a higher scope)
 };
 
 Token::Token(TOKENTYPE type, std::string value, unsigned int line, unsigned int col)
