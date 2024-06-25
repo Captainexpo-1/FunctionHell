@@ -1,6 +1,11 @@
-var int x = int <> {
+var int x = int <int x> {
     ret 2
+    var int y = int <int y> {
+        ret 3
+    }
+    var int z = int <> {
+        ret 2
+    }
 }
-var int y = int <> {
-    ret ^x
-}
+
+x

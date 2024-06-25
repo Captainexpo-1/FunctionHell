@@ -8,6 +8,11 @@ void debugOut(std::string msg) {
 
 LLVMCompiler::LLVMCompiler() : builder(context) {
     module = new llvm::Module("main", context);
+    // Create the main function
+    llvm::FunctionType* mainFunctionType = llvm::FunctionType::get(llvm::Type::getVoidTy(context), false);
+    llvm::Function* mainFunction = llvm::Function::Create(mainFunctionType, llvm::Function::ExternalLinkage, "main", module);
+    llvm::BasicBlock* block = llvm::BasicBlock::Create(context, "entry", mainFunction);
+    builder.SetInsertPoint(block);
 }
 
 void LLVMCompiler::compile(Program* program) {
@@ -65,17 +70,17 @@ llvm::Value* LLVMCompiler::compileNode(ASTNode* node) {
 }
 
 llvm::Value* LLVMCompiler::compileVariableCaptureAccess(VariableCaptureAccess* node) {
-
+    return compileNode(node->access);
 }
 
 llvm::Value* LLVMCompiler::compileReturnStatement(ReturnStatement* node) {
-
+    return builder.CreateRet(compileNode(node->value));
 }
 
 llvm::Value* LLVMCompiler::compileBinaryExpression(BinaryExpression* node) {
     auto left = compileNode(node->left);
     auto right = compileNode(node->right);
-    char op = node->op;
+    char op = node->op[0];
     switch (op)
     {
     case '+':
@@ -112,13 +117,134 @@ llvm::Value* LLVMCompiler::compileBooleanLiteral(BooleanLiteral* node) {
 }
 
 llvm::Value* LLVMCompiler::compileVariableDeclaration(VariableDeclaration* node) {
-    
+    debugOut("Compiling variable declaration: " + node->name);
+    llvm::Type* type = compileDataType(node->type);
+    debugOut("Type: " + node->type->toString());
+    llvm::Value* value = compileNode(node->value);
+    debugOut("Value: " + node->value->toString());
+    llvm::AllocaInst* alloca = builder.CreateAlloca(type, nullptr, node->name);
+    debugOut("Alloca: " + node->name);
+    if (builder.GetInsertBlock() == nullptr) {
+        langError("No block to insert into", -1, -1);
+    }
+    builder.CreateStore(value, alloca);
+    debugOut("Store: " + node->name);
+    return alloca;
 }
 
 
 
+typedef struct {
+    llvm::Type* type;
+    std::string name;
+} varInfo;
+typedef struct {
+    std::vector<varInfo*> captures;
+    std::string id;
+    uint intID = 0;
+} closureInfo;
+typedef struct {
+    std::vector<varInfo*> params;
+    std::vector<varInfo*> captures;
+    llvm::Type* returnType;
+    std::vector<ASTNode*> body;
+    closureInfo* closure;
+    std::string id;
+    uint intID = 0;
+} lambdaInfo;
+
+
 llvm::Value* LLVMCompiler::compileLambdaFunction(Function* node) {
-    
+    std::vector<varInfo*> paramInfos;
+    std::vector<varInfo*> captureInfos;
+
+    for (FunctionParameter* param : node->params) {
+        varInfo* info = new varInfo();
+        info->type = compileDataType(param->type);
+        info->name = param->name;
+        paramInfos.push_back(info);
+    }
+
+    for (ASTNode* statement : node->body) {
+        if (util_isType<VariableCaptureAccess>(statement)) {
+            VariableCaptureAccess* access = dynamic_cast<VariableCaptureAccess*>(statement);
+            varInfo* info = new varInfo();
+            info->type = compileDataType(access->type);
+            info->name = access->access->name;
+            captureInfos.push_back(info);
+        }
+    }
+
+    curLambda++;
+
+    closureInfo* closure = new closureInfo();
+    closure->captures = captureInfos;
+    closure->id = "closure_" + std::to_string(curLambda);
+    closure->intID = curLambda;
+
+    std::vector<llvm::Type*> closureTypes;
+    for (varInfo* capture : captureInfos) {
+        closureTypes.push_back(capture->type);
+    }
+    llvm::StructType* closureType = llvm::StructType::create(context, closureTypes, closure->id);
+
+    // Make sure to add the closure type to the module
+    module->getOrInsertGlobal(closure->id, closureType);
+
+    llvm::Type* returnType = compileDataType(node->returnType);
+
+    lambdaInfo* info = new lambdaInfo();
+    info->params = paramInfos;
+    info->captures = captureInfos;
+    info->returnType = returnType;
+    info->body = node->body;
+    info->id = "lambda_" + std::to_string(curLambda);
+    info->intID = curLambda;
+    info->closure = closure;
+
+    std::vector<llvm::Type*> paramTypes;
+    for (varInfo* param : paramInfos) {
+        paramTypes.push_back(param->type);
+    }
+
+    llvm::FunctionType* functionType = llvm::FunctionType::get(returnType, paramTypes, false);
+    llvm::Function* function = llvm::Function::Create(functionType, llvm::Function::ExternalLinkage, info->id, module);
+    llvm::BasicBlock* block = llvm::BasicBlock::Create(context, "entry", function);
+
+    auto oldBlock = builder.GetInsertBlock();
+    builder.SetInsertPoint(block);
+
+    std::vector<llvm::Value*> captures;
+    for (int i = 0; i < captureInfos.size(); i++) {
+        llvm::AllocaInst* alloca = builder.CreateAlloca(captureInfos[i]->type, nullptr, std::to_string(i));
+        captures.push_back(alloca);
+    }
+
+    int index = 0;
+    for (llvm::Value* capture : captures) {
+        llvm::Value* ptr = builder.CreateStructGEP(closureType, function->arg_begin(), index++);
+        llvm::Value* value = builder.CreateLoad(captureInfos[index]->type, ptr);
+        builder.CreateStore(value, capture);
+    }
+
+    std::vector<llvm::Value*> params;
+    for (varInfo* param : paramInfos) {
+        llvm::AllocaInst* alloca = builder.CreateAlloca(param->type, nullptr, param->name);
+        params.push_back(alloca);
+    }
+
+    index = 0;
+    for (llvm::Argument& arg : function->args()) {
+        builder.CreateStore(&arg, params[index++]);
+    }
+
+    for (ASTNode* statement : info->body) {
+        compileNode(statement);
+    }
+
+    builder.SetInsertPoint(oldBlock);
+
+    return function;
 }
 
 llvm::Value* LLVMCompiler::compileLambdaFunctionCall(VariableAccess* node) {

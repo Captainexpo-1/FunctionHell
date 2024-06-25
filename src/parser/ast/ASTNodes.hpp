@@ -160,7 +160,6 @@ public:
 
 class Function : public Expression {
 public:
-    std::string name;
     std::vector<FunctionParameter*> params;
     std::vector<ASTNode*> body;
     DataType* returnType;
