@@ -162,6 +162,7 @@ class Function : public Expression {
 public:
     std::vector<FunctionParameter*> params;
     std::vector<ASTNode*> body;
+    std::string recurseName = "__temp__";
     DataType* returnType;
     std::vector<VariableCaptureAccess*> captures;
     Function(std::vector<FunctionParameter*> params, DataType* returnType, std::vector<ASTNode*> body);

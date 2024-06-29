@@ -76,16 +76,17 @@ std::string VariableDeclaration::toJS() {
 }
 
 std::string Function::toJS(){
-    std::string o = "";
+    std::string o = "(function ";
+    o += recurseName + " ";
     o += "(";
     for(FunctionParameter* param: params){
         o += param->toJS() + ", ";
     }
-    o += ") => {";
+    o += ") {\n";
     for(ASTNode* node: body){
         o += node->toJS() + ";\n";
     }
-    o += "}";
+    o += "})";
     return o;
 }
 

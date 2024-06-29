@@ -66,6 +66,7 @@ int main(int argc, char** argv) {
     bool doCompile = !doTranspile;
     bool printTokens = false;
     bool printAST = false;
+    bool doTypeCheck = true;
     if (argc < 2 || argc == 0) { printHelp(argv); exit(1); }
     for(int i = 0; i < argc; i++){
         if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0){
@@ -93,6 +94,9 @@ int main(int argc, char** argv) {
         else if (strcmp(argv[i], "--printAST") == 0){
             printAST = true;
         }
+        else if (strcmp(argv[i], "--noTypeCheck") == 0){
+            doTypeCheck = false;
+        }
     }
     std::string source = readFile(argv[1]);
     setSource(source);
@@ -108,12 +112,15 @@ int main(int argc, char** argv) {
             std::cout << node->toString() << std::endl;
         }
     }
-    TypeChecker typeChecker;
-    int r = typeChecker.checkTypes(program->statements, nullptr, nullptr);
-    if (r != 0) {
-        std::cout << "Type checking failed..." << std::endl;
-        return 1;
+    if (doTypeCheck){
+        TypeChecker typeChecker;
+        int r = typeChecker.checkTypes(program->statements, nullptr, nullptr);
+        if (r != 0) {
+            std::cout << "Type checking failed..." << std::endl;
+            return 1;
+        }
     }
+
 
 
     if (doTranspile) transpileAST(program, output_file, runOutput);

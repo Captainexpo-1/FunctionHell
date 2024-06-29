@@ -1,13 +1,18 @@
 # λ++
+
+
+*Requires [Node.js](https://nodejs.org/en/download/) to run transpiled code*
+
 ## Overview
-λ++ is a programming language focused entirely on functions. Variables in λ++ are assigned exclusively to functions, similar to lambda calculus or the lambda/anonymous functions found in other languages.
+λ++ is a programming language focused entirely on functions. Variables in λ++ can only be assigned to functions, not literals. Consider it a creative constraint.
+
 
 ## Syntax
 Function Definition
 In λ++, functions are defined and assigned to variables with a specific syntax. Here is the general structure:
 
 ```go
-var <return_type> <variable_name> = <return_type> <(<parameter_type> <parameter_name>, ...)> {
+var <return_type> <variable_name> = <return_type> <<parameter_type> <parameter_name>, ...> {
     <function_body>
 }
 ```
@@ -61,7 +66,20 @@ else {
 }
 ```
 
-### Function Call:
+### For/While loops
+
+λ++ does not provide any built-in loops. Instead, recursion is used to achieve looping behavior. Here is an example of a recursive function that up to a given number:
+
+```go
+var void count = void <int n, int i> {
+    if (i < n) {
+        log with (i)
+        ^count with (int <> { ret n }, int <> { ret ^i + 1 })
+    }
+}
+```
+
+### Function Calls:
 
 To call a function, use the following syntax:
 
@@ -75,6 +93,18 @@ When a variable is accessed, it's function will be automatically called with no 
 var int x = int <> { ret 42 }
 
 x // 42
+```
+
+### Variable Captures:
+
+Variables in higher scopes than the function when it's defined can be accessed within the function. This is called a variable capture. It is done by using the `^` operator before the variable name.
+
+```go
+var int x = int <> { ret 42 }
+
+var int y = int <> { 
+    ret ^x // 42
+}
 ```
 
 ### Logging:
@@ -130,7 +160,7 @@ var void fizzbuzz = void <int n, int j> {
         log with (j)
     }
     if (j < n) {
-        ^fizzbuzz with (int <> { ret n } , int <> { ret j + 1 })
+        ^fizzbuzz with (int <> { ret ^n } , int <> { ret ^j + 1 })
     }
 }
 

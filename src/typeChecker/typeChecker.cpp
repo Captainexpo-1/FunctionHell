@@ -1,7 +1,7 @@
 #include "typeChecker.hpp"
 
 // Similar types
-bool areSimilar(DataType* d1, DataType* d2) {
+bool areSimilar(DataType* d1, DataType* d2, bool f = false) {
     if (d1->toString() == d2->toString()) {
         return true;
     }
@@ -9,7 +9,7 @@ bool areSimilar(DataType* d1, DataType* d2) {
         return true;
     }
     
-    return areSimilar(d2, d1);
+    return !f ? areSimilar(d2, d1, true) : false;
 }
 
 
@@ -17,13 +17,16 @@ TypeChecker::TypeChecker() {
     m_globalScope = new Scope();
 }
 
-void TypeChecker::printScope(Scope* scope) {
+std::string scopeToString(Scope* scope) {
     std::string o = "Scope {";
     for (const std::string& v : scope->var_names) {
         o += "\n   " + v + " -> " + scope->variables[v]->toString();
     }
     o += "\n}";
-    std::cout << o << std::endl;
+    return o;
+}
+void TypeChecker::printScope(Scope* scope) {
+    std::cout << scopeToString(scope) << std::endl;
 }
 
 DataType* TypeChecker::m_getSTDFunc(const std::string& name) {
@@ -77,12 +80,17 @@ int TypeChecker::checkTypes(std::vector<ASTNode*> statements, Scope* scope, Data
             } else if (util_isType<ReturnStatement>(statement)) {
                 std::cout << "  - Is return statement" << std::endl;
                 foundReturn = true;
-                if (int result = m_checkReturnStatement(statement, scope, returnType)) {
+                std::cout << "  - Found return statement" << std::endl;
+                std::cout << "  - Scope: " << scopeToString(scope) << " Return type: " << returnType->toString() << std::endl;
+                int result = m_checkReturnStatement(statement, scope, returnType);
+                std::cout << "  - Result: " << result << std::endl;
+                if (result != 0) { 
                     return result;
                 }
             } else if (util_isType<VariableDeclaration>(statement)) {
                 std::cout << "  - Is variable declaration" << std::endl;
-                if (int result = m_checkVariableDeclaration(dynamic_cast<VariableDeclaration*>(statement), scope)) {
+                int result = m_checkVariableDeclaration(dynamic_cast<VariableDeclaration*>(statement), scope);
+                if (result != 0) {
                     return result;
                 }
             } else if (util_isType<IfStatement>(statement)){
@@ -116,7 +124,8 @@ int TypeChecker::m_checkStatement(ASTNode* statement, Scope* scope, DataType* re
     if (util_isType<VariableDeclaration>(s)) {
         std::cout << "  - Is variable declaration" << std::endl;
         VariableDeclaration* vd = dynamic_cast<VariableDeclaration*>(s);
-        return m_checkVariableDeclaration(vd, scope);
+        int result = m_checkVariableDeclaration(vd, scope);
+
     }
     return 0;
 }
@@ -126,10 +135,16 @@ int TypeChecker::m_checkVariableDeclaration(VariableDeclaration* vd, Scope* scop
         langError("Variable " + vd->name + " already declared in this scope", -1, -1);
         return 1;
     } else {
+        std::cout << "    - Variable " << vd->name << " not found in scope" << std::endl;
         scope->variables[vd->name] = vd->type;
+        scope->var_names.push_back(vd->name);
+        std::cout << "    - Added variable to scope: " << vd->name << " -> " << vd->type->toString() << std::endl;
         if (util_isType<Function>(vd->value)) {
             std::cout << "    - Value is function" << std::endl;
-            return m_checkFunction(dynamic_cast<Function*>(vd->value), vd->type, scope);
+            std::cout << "   - Scope: " << scopeToString(scope) << std::endl;
+            Function* f = dynamic_cast<Function*>(vd->value);
+            f->recurseName = vd->name;
+            return m_checkFunction(f, vd->type, scope);
         } else if (util_isType<VariableAccess>(vd->value)) {
             std::cout << "    - Value is variable access" << std::endl;
             return m_checkVariableAccess(dynamic_cast<VariableAccess*>(vd->value), vd->type, scope);
@@ -137,8 +152,6 @@ int TypeChecker::m_checkVariableDeclaration(VariableDeclaration* vd, Scope* scop
             langError("Variable value cannot be non-function", -1,-1);
         }
     }
-    scope->variables[vd->name] = vd->type;
-    scope->var_names.push_back(vd->name);
     return 0;
 }
 
@@ -174,17 +187,33 @@ int TypeChecker::m_checkVariableAccess(VariableAccess* va, DataType* expectedTyp
 }
 
 int TypeChecker::m_checkReturnStatement(ASTNode* statement, Scope* scope, DataType* returnType) {
+    std::cout << "    - Casting return statement" << std::endl;
     ReturnStatement* rs = dynamic_cast<ReturnStatement*>(statement);
+    if (rs == nullptr) {
+        langError("Statement is not a ReturnStatement",-1,-1);
+        return 1; // or handle the error appropriately
+    }
+
+    std::cout << "    - Checking return statement: " << rs->toString() << std::endl;
+
     if (rs->value != nullptr) {
+        std::cout << "    - Return value is not null" << std::endl;
         DataType* rs_dt = m_getExpression(rs->value, scope);
         if (rs_dt == nullptr) {
+            langError("Return value type is null",-1,-1);
             return 1;
         }
+        std::cout << "    - Return value type: " << rs_dt->toString() << std::endl;
+
         if (!areSimilar(rs_dt, returnType)) {
             langError("Return type: " + rs_dt->toString() + " does not match expected type: " + returnType->toString(), -1, -1);
             return 1;
         }
+    } else {
+        std::cout << "    - Return value is null" << std::endl;
     }
+
+    std::cout << "    - Return statement passed" << std::endl;
     return 0;
 }
 
@@ -275,10 +304,10 @@ DataType* TypeChecker::m_getExpression(ASTNode* expr, Scope* scope) {
         return dt;
     } else if (util_isType<VariableCaptureAccess>(expr)) {
         VariableCaptureAccess* vca = dynamic_cast<VariableCaptureAccess*>(expr);
-        DataType* dt = m_findInHigherScope(vca->access->name, scope);
+        DataType* dt = m_findInScope(vca->access->name, scope);
         vca->type = dt;
         if (dt == nullptr) {
-            langError("Variable capture " + vca->access->name + " not declared in higher (capture access)", -1, -1);
+            langError("Variable capture " + vca->access->name + " not declared in scope", -1, -1);
             return nullptr;
         }
         return dt;
