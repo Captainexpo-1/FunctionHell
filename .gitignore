@@ -19,3 +19,5 @@ experiments/
 node_modules/
 output/
 _tmp_*
+*.zip
+lppide-*
