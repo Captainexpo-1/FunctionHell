@@ -16,7 +16,7 @@ std::string Expression::toJS() {
 std::string Program::toJS() {
     std::string result = "";
     for (ASTNode* statement : statements) {
-        result += statement->toJS() + ";";
+        result += statement->toJS() + ";\n";
     }
     return result;
 }
@@ -34,6 +34,7 @@ std::string IntegerLiteral::toJS() {
 }
 
 std::string FloatLiteral::toJS() {
+    std::cout << "TRANSPILED FLOAT TO " << std::to_string(value) << std::endl;
     return std::to_string(value);
 }
 
@@ -71,7 +72,7 @@ std::string VariableDeclaration::toJS() {
             }
         }
     }
-    return "let " + name/* + ": " + args + " => " + type->toJS()*/ + " = "  + valJs + ";";
+    return "let " + name/* + ": " + args + " => " + type->toJS()*/ + " = "  + valJs + ";\n";
 }
 
 std::string Function::toJS(){
@@ -82,7 +83,7 @@ std::string Function::toJS(){
     }
     o += ") => {";
     for(ASTNode* node: body){
-        o += node->toJS() + ";";
+        o += node->toJS() + ";\n";
     }
     o += "}";
     return o;
@@ -102,7 +103,7 @@ std::string VariableAssignment::toJS() {
         valJs = value->toJS();
     }
 
-    return name + " = " + valJs + ";";
+    return name + " = " + valJs + ";\n";
 }
 
 
@@ -113,7 +114,7 @@ std::string ReturnStatement::toJS() {
 std::string IfStatement::toJS() {
     std::string o = "if(" + condition->toJS() + ") {";
     for(ASTNode* node: body){
-        o += node->toJS() + ";";
+        o += node->toJS() + ";\n";
     }
     if (elseBody.size() == 0){
         o += "}";
@@ -121,7 +122,7 @@ std::string IfStatement::toJS() {
     }
     o += "} else {";
     for(ASTNode* node: elseBody){
-        o += node->toJS() + ";";
+        o += node->toJS() + ";\n";
     }
     o += "}";
     return o;

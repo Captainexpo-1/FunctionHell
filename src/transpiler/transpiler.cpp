@@ -7,23 +7,23 @@ Transpiler::Transpiler() {
 void Transpiler::m_addStd(){
     m_output += 
     // functions
-    "declare function require(name:string);"
-    "const __fs__ = require('fs');"
-    "var fileRead=(path)=>__fs__.readFileSync(path, 'utf8');"
-    "var fileWrite=(path, data)=>{try { __fs__.writeFileSync('output.txt', data, 'utf8'); console.log('File has been written'); } catch (err) { console.error('Error writing to file:', err); }};"
-    "var varErr=()=>console.error('Variable is not a function');"
-    "var log=(...args)=>console.log(...args);"
-    "var at: (x, index) => any =(x, index)=>{x()[index];};"
-    "var sin: (x) => number =(x)=>Math.sin(x);" 
-    "var cos: (x) => number =(x)=>Math.cos(x);" 
-    "var tan: (x) => number =(x)=>Math.tan(x);"
-    "var abs: (x) => number =(x)=>x() > 0 ? x() : -x();"
-    "var parseint: (x) => number =(x)=>parseInt(x());"
-    "var parsefloat: (x) => number =(x)=>parseFloat(x());"
-    "var len: (x) => number =(x)=>x().length;"
-    "var str: (x) => string =(x)=>x().toString();"
+    "const __fs__ = require('fs');\n"
+    "var fileRead = (path) => __fs__.readFileSync(path, 'utf8');\n"
+    "var fileWrite = (path, data) => { try { __fs__.writeFileSync('output.txt', data, 'utf8'); } catch (err) { console.error('Error writing to file:', err); }};\n"
+    "var fileAppend = (path, data) => { try { __fs__.appendFileSync('output.txt', data, 'utf8'); } catch (err) { console.error('Error writing to file:', err); }};\n"
+    "var varErr = () => console.error('Variable is not a function');\n"
+    "var log = (...args) => console.log(...args)\n;"
+    "var at = (x, index) => x()[index];"
+    "var sin = (x) => Math.sin(x);\n" 
+    "var cos = (x) => Math.cos(x);\n" 
+    "var tan = (x) => Math.tan(x);\n"
+    "var abs = (x) => x() > 0 ? x() : -x();\n"
+    "var parseint = (x) => parseInt(x());\n"
+    "var parsefloat = (x) => parseFloat(x());\n"
+    "var len = (x) => x().length;\n"
+    "var str = (x) => x().toString();\n"
     // constants
-    "var PI:() => number =()=>3.14159265;";
+    "var PI = () => 3.14159265;\n";
 }
 
 

@@ -128,13 +128,21 @@ Function* Parser::m_parseFunctionLiteral() {
     return fn;
 }
 
+//def parseExpression(self, precedence=0) -> Expression:
+//        left = self.parseAtom()
+//        while self.curToken().type in ORDER_OF_OPERATIONS and ORDER_OF_OPERATIONS[self.curToken().type][1] >= precedence:
+//            op = self.curToken().type
+//            self.advance()
+//            right = self.parseExpression(ORDER_OF_OPERATIONS[op][1])
+//            left = BinaryOperation(left, TOKEN_TO_OPERATOR[op], right)
+//        return left
 Expression* Parser::m_parseExpression(int precedence) {
     Expression* left = m_parseAtom();
-    while (ORDER_OF_OPERATIONS.find(m_CurrentToken.type) != ORDER_OF_OPERATIONS.end() && ORDER_OF_OPERATIONS[m_CurrentToken.type] >= precedence) {
-        std::string op = m_CurrentToken.value;
+    while (m_CurrentToken.type != NEWLINE && ORDER_OF_OPERATIONS.find(m_CurrentToken.type) != ORDER_OF_OPERATIONS.end() && ORDER_OF_OPERATIONS[m_CurrentToken.type] >= precedence) {
+        Token op = m_CurrentToken;
         m_advance();
-        Expression* right = m_parseExpression(ORDER_OF_OPERATIONS[m_CurrentToken.type]);
-        left = new BinaryExpression(left, right, op);
+        Expression* right = m_parseExpression(ORDER_OF_OPERATIONS[op.type]);
+        left = new BinaryExpression(left, right, op.value);
     }
     return left;
 }
@@ -182,22 +190,22 @@ VariableAssignment* Parser::m_parseVariableAssignment() {
 }
 DataType* Parser::m_rawParseDataType(TOKENTYPE type){
     switch(type){
-            case INTEGER_TYPE:
-                return new IntegerType();
-            case FLOAT_TYPE:
-                return new FloatType();
-            case STRING_TYPE:
-                return new StringType();
-            case BOOL_TYPE:
-                return new BoolType();
-            case VOID_TYPE:
-                return new VoidType();
-            case FUNCTION_TYPE:
-                return new FunctionType();
-            default:
-                return nullptr;
-
-        }
+        case INTEGER_TYPE:
+            return new IntegerType();
+        case FLOAT_TYPE:
+            std::cout << "FLOAT TYPE" << std::endl;
+            return new FloatType();
+        case STRING_TYPE:
+            return new StringType();
+        case BOOL_TYPE:
+            return new BoolType();
+        case VOID_TYPE:
+            return new VoidType();
+        case FUNCTION_TYPE:
+            return new FunctionType();
+        default:
+            return nullptr;
+    }
 }
 DataType* Parser::m_parseDataType() {
     // Special case for lists
@@ -294,6 +302,10 @@ Expression* Parser::m_parseAtom() {
     if (m_CurrentToken.type == INTEGER){
         return new IntegerLiteral(std::stoi(m_eat(INTEGER).value));
     } 
+    else if (m_CurrentToken.type == FLOAT){
+        std::cout << "FLOAT LITERAL GOT" << std::endl;
+        return new FloatLiteral(std::stof(m_eat(FLOAT).value));
+    }
     else if (m_CurrentToken.type == NEWLINE){
         m_eat(NEWLINE);
         return m_parseAtom();
@@ -306,9 +318,7 @@ Expression* Parser::m_parseAtom() {
         m_functionCaptures[m_functionCaptures.size()-1].push_back(vcc);
         return vcc;
     }
-    else if (m_CurrentToken.type == FLOAT){
-        return new FloatLiteral(std::stof(m_eat(FLOAT).value));
-    }
+
     else if (m_CurrentToken.type == STRING){
         return new StringLiteral(m_eat(STRING).value);
     }

@@ -15,3 +15,5 @@ Makefile
 *.cmake
 
 experiments/
+node_modules/
+output/

@@ -5,7 +5,7 @@
 #include "./errors/error.hpp"
 #include "./transpiler/transpiler.hpp"
 #include "./typeChecker/typeChecker.hpp"
-#include "./LLVMCompiler/compiler.hpp"
+//#include "./LLVMCompiler/compiler.hpp"
 
 std::string readFile(const char* filename)
 {
@@ -41,6 +41,7 @@ Program* runParser(std::vector<Token> tokens){
 
 void transpileAST(Program* program, const char* output_file, bool runOutput, bool rmJSOut){
     Transpiler transpiler;
+    std::cout << "Transpiling, output file = " << output_file << std::endl;
     std::string output = transpiler.transpile(program->statements);
 
     std::ofstream file(output_file);
@@ -54,17 +55,18 @@ void transpileAST(Program* program, const char* output_file, bool runOutput, boo
     } 
 }
 
-void compileAST(Program* program, const char* output_file){
-    LLVMCompiler compiler;
-    compiler.compile(program);
-    compiler.printModule();
-}
+//void compileAST(Program* program, const char* output_file){
+//    LLVMCompiler compiler;
+//    compiler.compile(program);
+//    compiler.printModule();
+//    compiler.writeToFile(output_file);
+//}
 
 int main(int argc, char** argv) {
     char* output_file = "output.ts";
     bool runOutput = false;
     bool rmJSOut = true;
-    bool doTranspile = false;
+    bool doTranspile = true;
     bool doCompile = !doTranspile;
     if (argc < 2 || argc == 0) { printHelp(argv); exit(1); }
     for(int i = 0; i < argc; i++){
@@ -82,7 +84,7 @@ int main(int argc, char** argv) {
         else if(strcmp(argv[i], "-noRm") == 0){
             rmJSOut = false;
         }
-        else if (strcmp(argv[i], "--transpile") == 0){
+        else if (strcmp(argv[i], "--noTranspile") == 0){
             doTranspile = false;
             std::cout << "Transpilation disabled" << std::endl;
         }
@@ -106,7 +108,7 @@ int main(int argc, char** argv) {
 
 
     if (doTranspile) transpileAST(program, output_file, runOutput, rmJSOut);
-    if (doCompile) compileAST(program, output_file);
+    //if (doCompile) compileAST(program, output_file);
 
 }
 

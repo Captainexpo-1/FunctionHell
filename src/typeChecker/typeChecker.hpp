@@ -5,6 +5,8 @@
 #include <vector>
 #include <map>
 #include <iostream>
+#include <unordered_set>
+#include <unordered_map>
 #include "../parser/ast/ASTNodes.hpp"
 
 #include "../errors/error.hpp"
@@ -23,14 +25,23 @@ public:
     int checkTypes(std::vector<ASTNode*> statements, Scope* scope, DataType* returnType); // Returns 0 if no errors, 1 if errors
     void printScope(Scope* scope);
 private:
-    DataType* m_findInScope(std::string name, Scope* scope);
-    DataType* m_findInImmediateScope(std::string name, Scope* scope);
-    DataType* m_findInHigherScope(std::string name, Scope* scope);
+    DataType* m_getSTDFunc(const std::string& name);
+    DataType* m_findInScope(const std::string& name, Scope* scope);
+    DataType* m_findInImmediateScope(const std::string& name, Scope* scope);
+    DataType* m_findInHigherScope(const std::string& name, Scope* scope);
+    int m_checkVariableAssignment(VariableAssignment* node, Scope* scope);
+    int m_checkReturnStatement(ASTNode* statement, Scope* scope, DataType* returnType);
+    int m_checkVariableAssignment(ASTNode* statement, Scope* scope);
+    int m_checkExpression(ASTNode* expr, Scope* scope, DataType* expectedType);
+    int m_checkVariableAccess(VariableAccess* va, DataType* expectedType, Scope* scope);
+    int m_checkFunction(Function* f, DataType* expectedType, Scope* scope);
+    int m_checkVariableDeclaration(VariableDeclaration* vd, Scope* scope);
+    int m_checkStatement(ASTNode* statement, Scope* scope, DataType* returnType);
+    DataType* m_evalOperation(DataType* d1, DataType* d2, const std::string& op);
     Scope* m_globalScope;
     DataType* m_getExpression(ASTNode* node, Scope* scope);
     DataType* m_checkBinaryExpression(BinaryExpression* node, Scope* scope);
     DataType* m_literalType(ASTNode* node, Scope* scope);
-    DataType* m_evalOperation(DataType* d1, DataType* d2);
     std::vector<std::tuple<std::string, DataType*>> getCaptures(std::vector<ASTNode*> statements, Scope* scope);
 };
 

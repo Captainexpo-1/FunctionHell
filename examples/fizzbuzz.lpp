@@ -1,0 +1,20 @@
+var void fizzbuzz = void <int n, int j> {
+    if (j % 15 == 0) {
+        log with ("FizzBuzz")
+    }
+    else if (j % 5 == 0){
+        log with ("Buzz")
+    }
+    else if (j % 3 == 0){
+        log with ("Fizz")
+    }
+    else {
+        log with (j)
+    }
+    if (j < n) {
+        ^fizzbuzz with (int <> { ret n } , int <> { ret j + 1 })
+    }
+    
+}
+
+fizzbuzz with (int <> { ret 100 }, int <> { ret 0 })

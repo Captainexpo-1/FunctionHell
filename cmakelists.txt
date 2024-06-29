@@ -9,20 +9,17 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Compiler flags
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
 
-# Specify compilers (optional, consider setting these externally)
-set(CMAKE_C_COMPILER "/usr/bin/gcc")
-set(CMAKE_CXX_COMPILER "/usr/bin/g++")
 
 # Find LLVM package
-find_package(LLVM REQUIRED CONFIG)
+#find_package(LLVM REQUIRED CONFIG)
 
 # Print out the LLVM version and libraries
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
 
 # Set LLVM include directories
-include_directories(${LLVM_INCLUDE_DIRS})
-add_definitions(${LLVM_DEFINITIONS})
+#include_directories(${LLVM_INCLUDE_DIRS})
+#add_definitions(${LLVM_DEFINITIONS})
 
 # Source files
 set(SRC_DIR src)
@@ -36,7 +33,7 @@ set(SRCS
     ${SRC_DIR}/parser/parser.cpp 
     ${SRC_DIR}/transpiler/transpiler.cpp
     ${SRC_DIR}/typeChecker/typeChecker.cpp
-    ${SRC_DIR}/LLVMCompiler/compiler.cpp
+    #${SRC_DIR}/LLVMCompiler/compiler.cpp
     ${SRC_DIR}/utils/utils.cpp
 )
 
@@ -51,8 +48,8 @@ include_directories(${SRC_DIR})
 add_executable(${PROJECT_NAME} ${SRCS})
 
 # Link LLVM libraries
-llvm_map_components_to_libnames(llvm_libs core orcjit native)
-target_link_libraries(${PROJECT_NAME} ${llvm_libs})
+#llvm_map_components_to_libnames(llvm_libs core orcjit native)
+#target_link_libraries(${PROJECT_NAME} ${llvm_libs})
 
 # Create necessary directories before linking
 add_custom_command(TARGET ${PROJECT_NAME} PRE_LINK

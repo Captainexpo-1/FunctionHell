@@ -5,6 +5,7 @@
 #include <vector>
 #include <map>
 #include <iostream>
+#include <fstream>
 
 #include "../parser/ast/ASTNodes.hpp"
 
@@ -13,6 +14,18 @@
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
 #include <llvm/IR/IRBuilder.h>
+#include <llvm/Support/FileSystem.h>
+#include <llvm/Support/FormattedStream.h>
+#include <llvm/IR/Verifier.h>
+#include <llvm/IR/Type.h>
+#include <llvm/IR/Function.h>
+#include <llvm/IR/BasicBlock.h>
+#include <llvm/IR/DerivedTypes.h>
+#include <llvm/IR/Value.h>
+#include <llvm/IR/GlobalVariable.h>
+#include <llvm/IR/GlobalValue.h>
+#include <llvm/IR/Constant.h>
+
 #include "./utils/utils.hpp"
 #include "../errors/error.hpp"
 
@@ -21,6 +34,7 @@ public:
     LLVMCompiler();
     void compile(Program* program);
     void printModule();
+    void writeToFile(const char* filename);
 private:
     uint curLambda = 0;
     std::map<std::string, uint> lambdaMap;
@@ -33,7 +47,7 @@ private:
     llvm::Value* compileStringLiteral(StringLiteral* node);
     llvm::Value* compileBooleanLiteral(BooleanLiteral* node);
     llvm::Value* compileVariableDeclaration(VariableDeclaration* node);
-    llvm::Value* compileLambdaFunction(Function* node);
+    llvm::Function* compileLambdaFunction(Function* node);
     llvm::Value* compileLambdaFunctionCall(VariableAccess* node);
     llvm::Value* compileVariableCaptureAccess(VariableCaptureAccess* node);
     llvm::Value* compileReturnStatement(ReturnStatement* node);
