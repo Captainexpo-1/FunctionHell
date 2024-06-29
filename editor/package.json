@@ -7,7 +7,10 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "electron ."
+    "start": "electron .",
+    "build-win": "electron-packager ./editor --platform=win32 --arch=x64 --overwrite",
+    "build-mac": "electron-packager ./editor --platform=darwin --arch=x64 --overwrite",
+    "build-linux": "electron-packager ./editor --platform=linux --arch=x64 --overwrite"
   },
   "author": "",
   "license": "ISC",

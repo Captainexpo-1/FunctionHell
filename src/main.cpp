@@ -39,7 +39,7 @@ Program* runParser(std::vector<Token> tokens){
     return program;
 }
 
-void transpileAST(Program* program, const char* output_file, bool runOutput, bool rmJSOut){
+void transpileAST(Program* program, const char* output_file, bool runOutput){
     Transpiler transpiler;
     std::cout << "Transpiling, output file = " << output_file << std::endl;
     std::string output = transpiler.transpile(program->statements);
@@ -48,10 +48,7 @@ void transpileAST(Program* program, const char* output_file, bool runOutput, boo
     file << output;
     file.close();
     if (runOutput ){
-        runCMD(("tsc " + std::string(output_file)).c_str());
-        std::string o_file = std::string(output_file).substr(0, std::string(output_file).size()-3) + ".js"; 
-        runCMD(("node " + o_file).c_str());
-        if(rmJSOut) runCMD(("rm " + o_file).c_str());
+        runCMD(("node " + std::string(output_file)).c_str());
     } 
 }
 
@@ -63,11 +60,12 @@ void transpileAST(Program* program, const char* output_file, bool runOutput, boo
 //}
 
 int main(int argc, char** argv) {
-    char* output_file = "output.ts";
+    char* output_file = "output.js";
     bool runOutput = false;
-    bool rmJSOut = true;
     bool doTranspile = true;
     bool doCompile = !doTranspile;
+    bool printTokens = false;
+    bool printAST = false;
     if (argc < 2 || argc == 0) { printHelp(argv); exit(1); }
     for(int i = 0; i < argc; i++){
         if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0){
@@ -81,9 +79,6 @@ int main(int argc, char** argv) {
         else if(strcmp(argv[i], "-r") == 0){
             runOutput = true;
         }
-        else if(strcmp(argv[i], "-noRm") == 0){
-            rmJSOut = false;
-        }
         else if (strcmp(argv[i], "--noTranspile") == 0){
             doTranspile = false;
             std::cout << "Transpilation disabled" << std::endl;
@@ -92,22 +87,36 @@ int main(int argc, char** argv) {
             doCompile = false;
             std::cout << "Compilation disabled" << std::endl;
         }
+        else if (strcmp(argv[i], "--printTokens") == 0){
+            printTokens = true;
+        }
+        else if (strcmp(argv[i], "--printAST") == 0){
+            printAST = true;
+        }
     }
     std::string source = readFile(argv[1]);
     setSource(source);
     std::vector<Token> tokens = runTokenizer(source);
+    if (printTokens){
+        for (Token t : tokens){
+            std::cout << t.toString() << std::endl;
+        }
+    }
     Program* program = runParser(tokens);
-    
+    if (printAST){
+        for (ASTNode* node : program->statements){
+            std::cout << node->toString() << std::endl;
+        }
+    }
     TypeChecker typeChecker;
     int r = typeChecker.checkTypes(program->statements, nullptr, nullptr);
     if (r != 0) {
         std::cout << "Type checking failed..." << std::endl;
         return 1;
     }
-    
 
 
-    if (doTranspile) transpileAST(program, output_file, runOutput, rmJSOut);
+    if (doTranspile) transpileAST(program, output_file, runOutput);
     //if (doCompile) compileAST(program, output_file);
 
 }

@@ -1,0 +1,5 @@
+var float x = float <> {
+    ret 2.5
+} 
+
+log with (float <> { ret ^x })

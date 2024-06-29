@@ -24,8 +24,8 @@ std::vector<TOKENTYPE> token_priorities = {
     FUNCTION_TYPE,
     // ----- Literals -----
     BOOL,
+    FLOAT, 
     INTEGER,
-    FLOAT,
     STRING,
     // ----- Special Characters -----
     LBRACE,
