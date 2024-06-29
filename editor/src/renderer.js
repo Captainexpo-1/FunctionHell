@@ -22,17 +22,38 @@ const highlightedCode = document.getElementById('highlighted-code');
 const editor = document.getElementById('editor');
 
 editor.addEventListener('input', updateSuggestionHover);
-editor.addEventListener('click', updateSuggestionHover);
+document.addEventListener('click', updateSuggestionHover);
 editor.addEventListener('keyup', updateSuggestionHover);
 
 
 var curSuggestion = "";
 var holdingControl = false;
 
+var sampleProgram = `var void fizzbuzz = void <int n, int j> { // The function fizzbuzz returns void and takes two integer functions n and j as arguments
+    if (j % 15 == 0) {
+        log with (string <> { ret "FizzBuzz" })
+    }
+    else if (j % 5 == 0){
+        log with (string <> { ret "Buzz" })
+    }
+    else if (j % 3 == 0){
+        log with (string <> { ret "Fizz" })
+    }
+    else {
+        log with (int <> { ret ^j })
+    }
+    if (j < n) {
+        ^fizzbuzz with (int <> { ret ^n } , int <> { ret ^j + 1 }) // Recursive call
+    }
+}
+fizzbuzz with (int <> { ret 100 }, int <> { ret 0 }) // Call the function with n = 100 and j = 0
+`
 window.addEventListener("DOMContentLoaded", (e)=>{
+    editor.value = sampleProgram;
     updateFontSize()
     highlightedCode.innerHTML = highlight(editor.value);
     updateSuggestionHover()
+    suggest()
 })
 
 editor.addEventListener('input', (event) => {
@@ -85,6 +106,13 @@ function updateFontSize(){
     document.querySelector("#hover-box").style.fontSize = fontSize + "px";
 }
 editor.addEventListener("keydown", (e) => {
+    if (!file_modified && file_lastLoad != null){ 
+        const qp = document.getElementById("quicksave-path");
+        qp.innerText += " ●";
+        file_modified = true;
+    }
+
+    
     if (e.key == "Tab") {
         e.preventDefault();
         const start = e.target.selectionStart;
@@ -117,6 +145,9 @@ editor.addEventListener("keydown", (e) => {
             fontSize -= 1;
             updateFontSize()
             return;
+        }
+        else if (e.key.toLowerCase() == "s"){
+            saveFile(true)
         }
     }
     else if (e.key == "Control") {
@@ -231,7 +262,9 @@ function highlightLine(line) {
     let word = "";
     let inWord = false;
     for (let i = 0; i < line.length; i++) {
-        const char = line[i];
+        // "hello"
+        // iter2, i = 7
+        const char = line[i]; // "
         if (char == "/"){
             if (line[i+1] == "/"){
                 highlightedLine += `<span class="comment">${line.substring(i)}</span>`
@@ -239,7 +272,7 @@ function highlightLine(line) {
             }
         }
         if (char == "\""){
-            if(word.length > 0){
+            if(word.length != 0){
                 highlightedLine += highlightWord(word);
                 word = "";
             }
@@ -250,12 +283,12 @@ function highlightLine(line) {
                 cstr += line[j]
                 j++;
             }
-            i = j;
-            cstr += line[j] == "\"" ? "\"" : ""
-            highlightedLine += `<span class="string">${cstr}</span>`
-            if(j == line.length) break;
+            // cstr = "hello
+            i = j; // i = 7
+            cstr += line[j] == "\"" ? "\"" : "" // adds 
+            highlightedLine += `<span class="string">${cstr}</span>` // <span class="string">"hello"</span>
         }
-        if (operators.includes(char)) {
+        else if (operators.includes(char)) {
             if (inWord) {
                 inWord = false;
                 highlightedLine += highlightWord(word);
@@ -263,7 +296,6 @@ function highlightLine(line) {
             }
             highlightedLine += highlightWord(char);
         }
-        
         else if (char == " " || char == "\n" || delimiters.includes(char)) {
             if (inWord) {
                 inWord = false;
@@ -282,12 +314,9 @@ function highlightLine(line) {
         highlightedLine += highlightWord(word);
     }
     DP[line] = highlightedLine;
-
-
     return highlightedLine;
 }
 function highlight(code) {
-    let n = performance.now();
     let highlightedCode = "";
     const lines = code.split("\n");
     for (let i = 0; i < lines.length; i++) {
@@ -297,19 +326,27 @@ function highlight(code) {
         }
     }
     setScroll()
-    console.log("Time: ", Math.round(performance.now() - n), "ms")
     return highlightedCode;
 
 }
-
+function setOutput(text, type){
+    // Sanitize text
+    let out = "";
+    switch(type){
+        case "text":
+            out = text
+        case "error":
+            out = `<span class="error">${text}</span>`
+    }
+    document.querySelector("#output-box").innerHTML = out;
+}
 document.querySelector("#run-button").addEventListener("click", () => {
     const code = editor.value;
-    ipcRenderer.send("write-file", code, "./_tmp_lppcode.lpp");
+    fs.writeFileSync(__dirname + "/_tmp_lppcode.lpp", code);
     ipcRenderer.send('get-compiled-code');
     // Run the compiled code
-    let output;
+    let output = "There was an error, abort!";
     const cmd = `node ${__dirname}/_tmp_lppcompiledcode.js`;
-    console.log("Running command: ", cmd);
     exec(cmd, (error, stdout, stderr) => {
         if (error) {
             output = error.message;
@@ -323,7 +360,7 @@ document.querySelector("#run-button").addEventListener("click", () => {
             output = stdout.replace(/\n/g, "<br>");
             console.log(`Output: ${stdout}`);
         }
-        document.querySelector("#output-box").innerHTML = output
+        document.querySelector("#output-box").innerHTML = output;
     });
-
+    
 });

@@ -18,3 +18,4 @@ Makefile
 experiments/
 node_modules/
 output/
+_tmp_*

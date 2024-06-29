@@ -10,7 +10,8 @@ function createWindow() {
             contextIsolation: false,
             enableRemoteModule: false,
             nodeIntegration: true,
-        }
+        },
+        
     });
 
     win.loadFile('src/index.html');

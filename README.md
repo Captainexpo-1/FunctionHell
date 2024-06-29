@@ -1,6 +1,6 @@
 # λ++
 ## Overview
-λ++ is a programming language focused entirely on functions. Variables in Function Hell are assigned exclusively to functions, similar to lambda calculus or the lambda/anonymous functions found in other languages.
+λ++ is a programming language focused entirely on functions. Variables in λ++ are assigned exclusively to functions, similar to lambda calculus or the lambda/anonymous functions found in other languages.
 
 ## Syntax
 Function Definition
@@ -82,7 +82,7 @@ x // 42
 To print output to the console, use the `log` function:
 
 ```go
-log with ("Hello, World!")
+log with (string <> { ret "Hello, World!"}) // Outputs: Hello, World!
 ```
 
 ### Comments:
@@ -118,19 +118,19 @@ The classic "fizzbuzz" program
 ```go
 var void fizzbuzz = void <int n, int j> {
     if (j % 15 == 0) {
-        log with ("FizzBuzz")
+        log with (string <> { ret "FizzBuzz" })
     }
     else if (j % 5 == 0){
-        log with ("Buzz")
+        log with (string <> { ret "Buzz" })
     }
     else if (j % 3 == 0){
-        log with ("Fizz")
+        log with (string <> { ret "Fizz" })
     }
     else {
         log with (j)
     }
     if (j < n) {
-        fizzbuzz with (int <> { ret n } , int <> { ret j + 1 })
+        ^fizzbuzz with (int <> { ret n } , int <> { ret j + 1 })
     }
 }
 
@@ -142,7 +142,7 @@ fizzbuzz with (int <> { ret 100 }, int <> { ret 0 })
 
 The standard library provides many functions that make life easier for the programmer. The full list includes
 
-- `log`: Print to stdout `log with (x)` equivalent to `print(x)` in python
+- `log`: Print to stdout `log with (x)` equivalent to `print(x())` in python
 - `append`: Append to list or string `append with (x, val)` equivalent to `x.append(val)` in python
 - `at`: Returns the value at the specified index in a string or list `at with (x, index)` equivalent to `x[index]` in c++, python, etc. 
 - `sin, cos, tan`: Returns the sin, cosin, or tangent of some radian value
