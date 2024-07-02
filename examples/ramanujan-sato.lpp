@@ -1,0 +1,88 @@
+var int factorial = int <int x> {
+    if (x <= 1) {
+        ret 1
+    }
+    ret ^factorial with (int <> { ret ^x - 1 }) * x
+}
+
+var int iPow = int <int a, int b, int c> {
+    if (b <= 0) {
+        ret c
+    }
+    ret ^iPow with (int <> { ret ^a }, int <> { ret ^b - 1 }, int <> { ret c * a })
+}
+
+var float prefix = float <> {
+    ret 2 * ^sqrt with (float <> { ret 2.0 }) / (99 * 99)
+}
+
+var int maxIters = int <> {
+    ret 10
+}
+
+var float seriesPre = float <int k> {
+    ret ^factorial with (int <> { ret 4 * k }) /
+        ^factorial with (int <> { ret k })
+    
+}
+
+var float seriesPost = float <int k>{
+    ret (26390 * ^k + 1103) /
+                ^iPow with (
+                    int <> { ret 396 }, 
+                    int <> { ret 4 * ^k }, 
+                    int <> { ret 1 }
+        )
+
+}
+
+var float series = float <int k, float cur> {
+    if (k >= ^maxIters) {
+        ret 1/^prefix*cur
+    }
+    //log with (string <> {ret "CUR:"}, int <> { ret ^cur})
+    ret ^series with (
+        int <> { ret ^k + 1 },
+        float <> {
+            ret ^cur + (^seriesPre with (int <> {ret ^k}) * ^seriesPost with (int <> {ret ^k}))
+                
+        }
+    )
+}
+
+// Tests
+
+
+var void runTests = void <> {
+    // Test factorial
+    log with (string <> {ret "FACTORIAL"})
+    log with (int <> { ret 5 }, int <> { ret ^factorial with (int <> { ret 5 }) }) // Expected output: 5! = 120 GOOD!
+    log with (int <> { ret 0 }, int <> { ret ^factorial with (int <> { ret 0 }) }) // Expected output: 0! = 1 GOOD!
+    log with (int <> { ret 1 }, int <> { ret ^factorial with (int <> { ret 1 }) }) // Expected output: 1! = 1 GOOD!
+
+    // Test iPow
+    log with (string <> {ret "IPOW"})
+    log with (int <> { ret 2 }, int <> { ret 3 }, int <> { ret 1 }, int <> { ret ^iPow with (int <> { ret 2 }, int <> { ret 3 }, int <> { ret 1 }) }) // Expected output: 2^3 = 8 GOOD!
+    log with (int <> { ret 5 }, int <> { ret 0 }, int <> { ret 1 }, int <> { ret ^iPow with (int <> { ret 5 }, int <> { ret 0 }, int <> { ret 1 }) }) // Expected output: 5^0 = 1 GOOD!
+
+    // Test prefix
+    log with (string <> {ret "PREFIX"})
+    log with (float <> { ret ^prefix }) // Expected output: some floating point number, calculation: (2 * sqrt(2)) / (99 * 99) GOOD!
+
+    // Test maxIters
+    log with (string <> {ret "MAXITERS"})
+    log with (int <> { ret ^maxIters }) // Expected output: 10 GOOD!
+    
+    log with (string <> {ret "SERIES PRE"})
+    log with (float <> {ret ^seriesPre with (int <> { ret 1})})
+
+    log with (string <> {ret "SERIES POST"})
+    log with (float <> {ret ^seriesPost with (int <> { ret 1})})
+    // Test series
+    log with (string <> {ret "SERIES"})
+    log with (int <> { ret 0 }, float <> { ret 0 }, float <> { ret ^series with (int <> { ret 0 }, float <> { ret 0 }) }) // Expected output: 3.14159...
+}
+
+log with (float <> { ret ^series with (int <> { ret 0 }, float <> { ret 0 }) }) // PI!
+
+

@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <fstream>
 #include "../parser/ast/ASTNodes.hpp"
 
 class Transpiler {

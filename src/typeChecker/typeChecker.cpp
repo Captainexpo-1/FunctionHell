@@ -15,6 +15,7 @@ bool areSimilar(DataType* d1, DataType* d2, bool f = false) {
 
 TypeChecker::TypeChecker() {
     m_globalScope = new Scope();
+    m_addSTD(m_globalScope);
 }
 
 std::string scopeToString(Scope* scope) {
@@ -29,16 +30,22 @@ void TypeChecker::printScope(Scope* scope) {
     std::cout << scopeToString(scope) << std::endl;
 }
 
-DataType* TypeChecker::m_getSTDFunc(const std::string& name) {
-    static std::unordered_set<std::string> stdFunctions = {
-        "log", "fileRead", "fileWrite", "varErr", "at", "sin",
-        "cos", "tan", "abs", "parseint", "parsefloat", "len", "str"
-    };
-
-    if (stdFunctions.find(name) != stdFunctions.end()) {
-        return new FunctionType();
-    }
-    return nullptr;
+void TypeChecker::m_addSTD(Scope* scope) {
+    scope->variables["log"] = new VoidType();
+    scope->variables["fileRead"] = new StringType();
+    scope->variables["fileWrite"] = new VoidType();
+    scope->variables["varErr"] = new VoidType();
+    scope->variables["at"] = new IntegerType();
+    scope->variables["sin"] = new FloatType();
+    scope->variables["cos"] = new FloatType();
+    scope->variables["tan"] = new FloatType();
+    scope->variables["abs"] = new FloatType();
+    scope->variables["parseint"] = new IntegerType();
+    scope->variables["parsefloat"] = new FloatType();
+    scope->variables["len"] = new IntegerType();
+    scope->variables["str"] = new StringType();
+    scope->variables["sqrt"] = new FloatType();
+    scope->variables["PI"] = new FloatType();
 }
 
 DataType* TypeChecker::m_findInImmediateScope(const std::string& name, Scope* scope) {
@@ -173,15 +180,15 @@ int TypeChecker::m_checkFunction(Function* f, DataType* expectedType, Scope* sco
 int TypeChecker::m_checkVariableAccess(VariableAccess* va, DataType* expectedType, Scope* scope) {
     DataType* found = m_findInScope(va->name, scope);
     if (found == nullptr) {
-        found = m_getSTDFunc(va->name);
-        if (found == nullptr) {
-            langError("Variable " + va->name + " not declared in this scope (access)", -1, -1);
-            return 1;
-        }
+        langError("Variable " + va->name + " not declared in this scope (access)", -1, -1);
+        return 1;
     }
     if (found->toString() != expectedType->toString()) {
         langError("Variable " + va->name + " type does not match variable type", -1, -1);
         return 1;
+    }
+    if (va->args.size() > 0){
+
     }
     return 0;
 }
