@@ -20,20 +20,21 @@
             }
             #editor, #highlighted-code {
                 width: calc(100% - 25px); 
-                height: 75%;
+                height: calc(75% - 25px);
                 position: absolute;
                 top: 0px;
                 left: 0px;
                 padding-top: 50px;
-                padding-left: 15px;
+                padding-left: 25px;
+                padding-bottom: 0px;
                 margin: 0;
                 font-family: inherit;
                 border: none;
                 outline: none;
                 white-space: pre;
+                scrollbar-color: transparent;
+                scrollbar-width:none;
                 overflow: auto;
-                scrollbar-width: thin;
-                scrollbar-color: rgb(89, 89, 89) rgb(40, 44, 52);
             }
             #editor {
                 background: none;
@@ -41,6 +42,10 @@
                 caret-color: white; /* Make the caret (cursor) color white */
                 resize: none;
                 z-index: 1; /* Ensure the textarea is above the highlighted code */
+
+                scrollbar-width: thin;
+                scrollbar-color: rgb(89, 89, 89) rgb(40, 44, 52);
+
             }
             #highlighted-code {
                 pointer-events: none; /* Make sure the highlighted code is not interactive */
@@ -91,12 +96,21 @@
                 color: white;
                 padding-left: 125px;
                 padding-right: 125px;
-                display: flex;
+                display: block;
                 z-index: 2;
                 overflow-y: scroll;
                 overflow-x: hidden;
                 scrollbar-width: thin;
                 scrollbar-color: rgb(89, 89, 89) rgb(40, 44, 52);
+            }
+            #numbers{
+                position: absolute;
+                left: 0;
+                width: 10px;
+                font-size: 10;
+                color: rgb(89, 89, 89);
+                z-index: 1;
+                height: max-content;
             }
             .keyword { color: rgb(202, 25, 25); }
             .string { color: rgb(89, 248, 89); }
@@ -202,10 +216,22 @@
                 padding-left: 5px;
                 padding-right: 5px;
             }
+
+            .output-text {
+                white-space: pre;
+            }
+            .output-error {
+                font-weight: bold;
+                color: rgb(202, 25, 25);
+            }
+            .output-warning {
+                color: rgb(255, 255, 0);
+            }
         </style>
     </head>
     <body>
-        <div id="highlighted-code"></div>
+        
+        
         
         <div id="top-bar">
             <button type="button" class="button" id="run-button">▶</button>
@@ -213,8 +239,14 @@
             <button type="button" class="button" id="save-button" onclick="document.getElementById('save-modal').style.display = 'block';">💾</button>
             <div id="quicksave-path">No open file</div>
         </div>
-        <textarea id="editor" spellcheck="false"></textarea>
-        
+        <div id="editing-area">
+            <textarea id="editor" spellcheck="false"></textarea>
+            <div id="numbers">1 2 3 4 5 6 7 8 9 </div>
+            <div id="highlighted-code">
+
+            </div>
+        </div>
+
         <div id="save-modal" class="modal">
             <div class="modal-content">
                 <span class="close" onclick="document.getElementById('save-modal').style.display = 'none';">&times;</span>

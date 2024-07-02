@@ -67,6 +67,7 @@ int main(int argc, char** argv) {
     bool printTokens = false;
     bool printAST = false;
     bool doTypeCheck = true;
+    bool doLog = false;
     if (argc < 2 || argc == 0) { printHelp(argv); exit(1); }
     for(int i = 0; i < argc; i++){
         if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0){
@@ -97,6 +98,9 @@ int main(int argc, char** argv) {
         else if (strcmp(argv[i], "--noTypeCheck") == 0){
             doTypeCheck = false;
         }
+        else if (strcmp(argv[i], "--log") == 0){
+            doLog = true;
+        }
     }
     std::string source = readFile(argv[1]);
     setSource(source);
@@ -106,12 +110,17 @@ int main(int argc, char** argv) {
             std::cout << t.toString() << std::endl;
         }
     }
+    if (doLog) {
+        std::cout << "Got " << tokens.size() << " tokens" << "\n" << "Parsing..." << std::endl;
+    }
+    
     Program* program = runParser(tokens);
     if (printAST){
         for (ASTNode* node : program->statements){
             std::cout << node->toString() << std::endl;
         }
     }
+    if (doLog) std::cout << "Parsed " << program->statements.size() << " statements" << "\n" << "Running type checker..." << std::endl;
     if (doTypeCheck){
         TypeChecker typeChecker;
         int r = typeChecker.checkTypes(program->statements, nullptr, nullptr);
@@ -122,10 +131,13 @@ int main(int argc, char** argv) {
     }
 
 
-
+    std::cout << "Type checking passed" << "\n" << "Transpiling..." << std::endl;
     if (doTranspile) transpileAST(program, output_file, runOutput);
     //if (doCompile) compileAST(program, output_file);
 
+
+    delete program;
+    return 0;
 }
 
 

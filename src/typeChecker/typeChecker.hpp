@@ -24,6 +24,7 @@ public:
     TypeChecker();
     int checkTypes(std::vector<ASTNode*> statements, Scope* scope, DataType* returnType); // Returns 0 if no errors, 1 if errors
     void printScope(Scope* scope);
+    ~TypeChecker();
 private:
     void m_addSTD(Scope* scope);
     DataType* m_findInScope(const std::string& name, Scope* scope);

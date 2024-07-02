@@ -76,32 +76,32 @@ int TypeChecker::checkTypes(std::vector<ASTNode*> statements, Scope* scope, Data
         scope = m_globalScope;
     }
     for (ASTNode* statement : statements) {
-        std::cout << "Checking: " << statement->toString() << std::endl;
+        //std::cout << "Checking: " << statement->toString() << std::endl;
         if (util_isType<Statement>(statement)) {
-            std::cout << "  - Is statement" << std::endl;
+            //std::cout << "  - Is statement" << std::endl;
             if (util_isType<VariableAssignment>(statement)) {
-                std::cout << "  - Is variable assignment" << std::endl;
+                //std::cout << "  - Is variable assignment" << std::endl;
                 if (int result = m_checkVariableAssignment(statement, scope)) {
                     return result;
                 }
             } else if (util_isType<ReturnStatement>(statement)) {
-                std::cout << "  - Is return statement" << std::endl;
+                //std::cout << "  - Is return statement" << std::endl;
                 foundReturn = true;
-                std::cout << "  - Found return statement" << std::endl;
-                std::cout << "  - Scope: " << scopeToString(scope) << " Return type: " << returnType->toString() << std::endl;
+                //std::cout << "  - Found return statement" << std::endl;
+                //std::cout << "  - Scope: " << scopeToString(scope) << " Return type: " << returnType->toString() << std::endl;
                 int result = m_checkReturnStatement(statement, scope, returnType);
-                std::cout << "  - Result: " << result << std::endl;
+                //std::cout << "  - Result: " << result << std::endl;
                 if (result != 0) { 
                     return result;
                 }
             } else if (util_isType<VariableDeclaration>(statement)) {
-                std::cout << "  - Is variable declaration" << std::endl;
+                //std::cout << "  - Is variable declaration" << std::endl;
                 int result = m_checkVariableDeclaration(dynamic_cast<VariableDeclaration*>(statement), scope);
                 if (result != 0) {
                     return result;
                 }
             } else if (util_isType<IfStatement>(statement)){
-                std::cout << "  - Is if statement" << std::endl;
+                //std::cout << "  - Is if statement" << std::endl;
                 IfStatement* is = dynamic_cast<IfStatement*>(statement);
                 if (int result = checkTypes(is->body, scope, returnType)) {
                     return result;
@@ -129,7 +129,7 @@ int TypeChecker::checkTypes(std::vector<ASTNode*> statements, Scope* scope, Data
 int TypeChecker::m_checkStatement(ASTNode* statement, Scope* scope, DataType* returnType) {
     Statement* s = dynamic_cast<Statement*>(statement);
     if (util_isType<VariableDeclaration>(s)) {
-        std::cout << "  - Is variable declaration" << std::endl;
+        //std::cout << "  - Is variable declaration" << std::endl;
         VariableDeclaration* vd = dynamic_cast<VariableDeclaration*>(s);
         int result = m_checkVariableDeclaration(vd, scope);
 
@@ -142,18 +142,18 @@ int TypeChecker::m_checkVariableDeclaration(VariableDeclaration* vd, Scope* scop
         langError("Variable " + vd->name + " already declared in this scope", -1, -1);
         return 1;
     } else {
-        std::cout << "    - Variable " << vd->name << " not found in scope" << std::endl;
+        //std::cout << "    - Variable " << vd->name << " not found in scope" << std::endl;
         scope->variables[vd->name] = vd->type;
         scope->var_names.push_back(vd->name);
-        std::cout << "    - Added variable to scope: " << vd->name << " -> " << vd->type->toString() << std::endl;
+        //std::cout << "    - Added variable to scope: " << vd->name << " -> " << vd->type->toString() << std::endl;
         if (util_isType<Function>(vd->value)) {
-            std::cout << "    - Value is function" << std::endl;
-            std::cout << "   - Scope: " << scopeToString(scope) << std::endl;
+            //std::cout << "    - Value is function" << std::endl;
+            //std::cout << "   - Scope: " << scopeToString(scope) << std::endl;
             Function* f = dynamic_cast<Function*>(vd->value);
             f->recurseName = vd->name;
             return m_checkFunction(f, vd->type, scope);
         } else if (util_isType<VariableAccess>(vd->value)) {
-            std::cout << "    - Value is variable access" << std::endl;
+            //std::cout << "    - Value is variable access" << std::endl;
             return m_checkVariableAccess(dynamic_cast<VariableAccess*>(vd->value), vd->type, scope);
         } else {
             langError("Variable value cannot be non-function", -1,-1);
@@ -173,7 +173,7 @@ int TypeChecker::m_checkFunction(Function* f, DataType* expectedType, Scope* sco
         funcScope->variables[fp->name] = fp->type;
         funcScope->var_names.push_back(fp->name);
     }
-    printScope(funcScope);
+    //printScope(funcScope);
     return checkTypes(f->body, funcScope, f->returnType);
 }
 
@@ -194,33 +194,33 @@ int TypeChecker::m_checkVariableAccess(VariableAccess* va, DataType* expectedTyp
 }
 
 int TypeChecker::m_checkReturnStatement(ASTNode* statement, Scope* scope, DataType* returnType) {
-    std::cout << "    - Casting return statement" << std::endl;
+    //std::cout << "    - Casting return statement" << std::endl;
     ReturnStatement* rs = dynamic_cast<ReturnStatement*>(statement);
     if (rs == nullptr) {
         langError("Statement is not a ReturnStatement",-1,-1);
         return 1; // or handle the error appropriately
     }
 
-    std::cout << "    - Checking return statement: " << rs->toString() << std::endl;
+    //std::cout << "    - Checking return statement: " << rs->toString() << std::endl;
 
     if (rs->value != nullptr) {
-        std::cout << "    - Return value is not null" << std::endl;
+        //std::cout << "    - Return value is not null" << std::endl;
         DataType* rs_dt = m_getExpression(rs->value, scope);
         if (rs_dt == nullptr) {
             langError("Return value type is null",-1,-1);
             return 1;
         }
-        std::cout << "    - Return value type: " << rs_dt->toString() << std::endl;
+        //std::cout << "    - Return value type: " << rs_dt->toString() << std::endl;
 
         if (!areSimilar(rs_dt, returnType)) {
             langError("Return type: " + rs_dt->toString() + " does not match expected type: " + returnType->toString(), -1, -1);
             return 1;
         }
     } else {
-        std::cout << "    - Return value is null" << std::endl;
+        //std::cout << "    - Return value is null" << std::endl;
     }
 
-    std::cout << "    - Return statement passed" << std::endl;
+    //std::cout << "    - Return statement passed" << std::endl;
     return 0;
 }
 
@@ -232,13 +232,13 @@ int TypeChecker::m_checkVariableAssignment(ASTNode* statement, Scope* scope) {
         return 1;
     }
     if (util_isType<Function>(va->value)) {
-        std::cout << "    - Value is function" << std::endl;
+        //std::cout << "    - Value is function" << std::endl;
         return m_checkFunction(dynamic_cast<Function*>(va->value), va_dt, scope);
     } else if (util_isType<VariableAccess>(va->value)) {
-        std::cout << "    - Value is variable access" << std::endl;
+        //std::cout << "    - Value is variable access" << std::endl;
         return m_checkVariableAccess(dynamic_cast<VariableAccess*>(va->value), va_dt, scope);
     } else {
-        std::cout << "    - Value is expression" << std::endl;
+        //std::cout << "    - Value is expression" << std::endl;
         return m_checkExpression(va->value, scope, va_dt);
     }
 }
@@ -276,7 +276,7 @@ std::vector<std::tuple<std::string, DataType*>> TypeChecker::getCaptures(std::ve
                 funcScope->variables[fp->name] = fp->type;
                 funcScope->var_names.push_back(fp->name);
             }
-            printScope(funcScope);
+            //printScope(funcScope);
             std::vector<std::tuple<std::string, DataType*>> a = getCaptures(f->body, funcScope);
             captures.insert(captures.end(), a.begin(), a.end());
         }
@@ -404,4 +404,8 @@ DataType* TypeChecker::m_literalType(ASTNode* node, Scope* scope) {
         return new FunctionType();
     }
     return nullptr;
+}
+
+TypeChecker::~TypeChecker() {
+    delete m_globalScope;
 }

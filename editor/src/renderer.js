@@ -1,7 +1,9 @@
 
-const { ipcRenderer } = require("electron");
+const { ipcRenderer, app } = require("electron");
 const { exec, execSync } = require('child_process');
 const fs = require("fs")
+const path = require('path');
+const os = require('os');
 const keywords = "int float bool string void fn if else ret var with".split(" ");
 const operators = "+ - * / % = == != < > <= >= && || !".split(" ");
 const delimiters = " ( ) { } [ ] , ;".split(" ");
@@ -9,6 +11,7 @@ const openDelimiters = " ( { [".split(" ");
 const closeDelimiters = " ) } ]".split(" ");
 const literals = "true false".split(" ");
 
+let foundNames = []
 
 const delimiterMap = {
     "(": ")",
@@ -18,7 +21,7 @@ const delimiterMap = {
 var fontSize = 16;
 
 const highlightedCode = document.getElementById('highlighted-code');
-
+const outputBox = document.getElementById("output-box")
 const editor = document.getElementById('editor');
 
 editor.addEventListener('input', updateSuggestionHover);
@@ -30,11 +33,11 @@ var curSuggestion = "";
 var holdingControl = false;
 
 var sampleProgram = `var void fizzbuzz = void <int n, int j> { // The function fizzbuzz returns void and takes two integer functions n and j as arguments
-    if (j % 15 == 0) {
-        log with (string <> { ret "FizzBuzz" })
+    if (j % 15 == 0) { // If statement: if j mod 15 is 0 then execute the body
+        log with (string <> { ret "FizzBuzz" }) // The body: calls the function "log" with a function argument that returns "FizzBuzz
     }
-    else if (j % 5 == 0){
-        log with (string <> { ret "Buzz" })
+    else if (j % 5 == 0){ // If the previous if was false, check if j mod 5 is 0, if it is execute the body
+        log with (string <> { ret "Buzz" }) // call "log" with a function that returns "Buzz" 
     }
     else if (j % 3 == 0){
         log with (string <> { ret "Fizz" })
@@ -46,14 +49,41 @@ var sampleProgram = `var void fizzbuzz = void <int n, int j> { // The function f
         ^fizzbuzz with (int <> { ret ^n } , int <> { ret ^j + 1 }) // Recursive call
     }
 }
-fizzbuzz with (int <> { ret 100 }, int <> { ret 0 }) // Call the function with n = 100 and j = 0
+fizzbuzz with (int <> { ret 100 }, int <> { ret 0 }) // Recursively call the fizzbuzz function with n = 100 and j = 0
 `
+
+function isNodeInstalled() {
+    return new Promise((resolve, reject) => {
+      exec('node -v', (error, stdout, stderr) => {
+        if (error | stderr) {
+            console.error(`Error: ${error.message}`);
+            resolve(false); // Not installed
+        } else {
+            setOutput(`Node.js version: ${stdout}`, "text");
+            resolve(true); // Installed
+        }
+      });
+    });
+}
+  
+function disableRunButton() {
+    const rb = document.getElementById("run-button")
+    rb.disabled = true;
+    rb.style.cursor = "not-allowed";
+}
+
 window.addEventListener("DOMContentLoaded", (e)=>{
-    editor.value = sampleProgram;
-    updateFontSize()
-    highlightedCode.innerHTML = highlight(editor.value);
-    updateSuggestionHover()
-    suggest()
+    isNodeInstalled().then((installed) => {
+        if (!installed){
+            disableRunButton();
+            setOutput("Node.js is not installed. Please install Node.js from <a style='color: yellow;' href='https://nodejs.org'>https://nodejs.org</a>", "error", raw=true);
+        }
+        editor.value = sampleProgram;
+        updateFontSize()    
+        highlightedCode.innerHTML = highlight(editor.value);
+        updateSuggestionHover()
+        suggest()
+    });
 })
 
 editor.addEventListener('input', (event) => {
@@ -70,7 +100,7 @@ editor.addEventListener('input', (event) => {
         editor.selectionEnd = start;
     }
     highlightedCode.innerHTML = highlight(editor.value);
-    curSuggestion = suggest();
+    
     document.querySelector("#hover-box").innerHTML = highlight(curSuggestion);
 });
 var setScroll = () => {
@@ -104,8 +134,14 @@ function updateFontSize(){
     editor.style.fontSize = fontSize + "px";
     highlightedCode.style.fontSize = fontSize + "px";
     document.querySelector("#hover-box").style.fontSize = fontSize + "px";
+
+    editor.style.paddingLeft = `${fontSize/2}px`
+    highlightedCode.style.paddingLeft = `${fontSize/2}px`
+
+    document.querySelector("#numbers").fontSize = fontSize
 }
 editor.addEventListener("keydown", (e) => {
+    //curSuggestion = suggest();
     if (!file_modified && file_lastLoad != null){ 
         const qp = document.getElementById("quicksave-path");
         qp.innerText += " ●";
@@ -136,12 +172,14 @@ editor.addEventListener("keydown", (e) => {
     else if (holdingControl){
         // Up arrow
         if (e.key == "ArrowUp"){
+            e.preventDefault()
             fontSize += 1;
             updateFontSize()
             return;
         }
         // Down arrow
         else if (e.key == "ArrowDown"){
+            e.preventDefault()
             fontSize -= 1;
             updateFontSize()
             return;
@@ -179,7 +217,7 @@ function currentWord(code, cursor) {
 }
 
 function closestTo(word, targets){
-    let closest = 0;
+    let closest = -3;
     let cWord = "";
     if (word.length == 0) return ""
     for (let i = 0; i < targets.length; i++){
@@ -193,7 +231,7 @@ function closestTo(word, targets){
         }
         let errors = 0;
         for (let j = 0; j < Math.min(word.length, w.length); j++){
-            if(w[j] == word[j]) c+=2;
+            if(w[j] == word[j]) c+=1;
             else errors++;
         }
         c = c - Math.abs(word.length - w.length) - errors*errors
@@ -212,10 +250,7 @@ function suggest() {
     const cw = currentWord(code, cursor);
     //console.log("Current word: ", cw, "Cursor: ", cursor, "Code: ", code);
     
-    const c = closestTo(cw, 
-        keywords
-        .concat(literals)
-    );
+    const c = closestTo(cw, keywords.concat(literals).concat(foundNames));
     if (c.length == 0){
         document.querySelector("#hover-box").style.display = 'none';
     }else{
@@ -249,12 +284,14 @@ function highlightWord(word){
     } else if (literals.includes(word)) {
         return `<span class="literal">${word}</span>`;
     } else {
+        //if (!(word in foundNames) && word.length > 1){
+        //    foundNames.push(word)
+        //}
         return word;
     }
 }
 let DP = {}
 function highlightLine(line) {
-
     if (line in DP) 
         return DP[line];
 
@@ -316,6 +353,7 @@ function highlightLine(line) {
     DP[line] = highlightedLine;
     return highlightedLine;
 }
+
 function highlight(code) {
     let highlightedCode = "";
     const lines = code.split("\n");
@@ -326,41 +364,101 @@ function highlight(code) {
         }
     }
     setScroll()
-    return highlightedCode;
+    //console.log(getNewlines(code))
+    //ocument.querySelector("#numbers").innerHTML = getNewlines(code)
+    return highlightedCode + "\n".repeat(10);
 
 }
-function setOutput(text, type){
-    // Sanitize text
+function outputStyle(text, type, raw=false){
     let out = "";
-    switch(type){
-        case "text":
-            out = text
-        case "error":
-            out = `<span class="error">${text}</span>`
+    if (!raw) text = text.replace(/\n/g, "<br>").replace(/\t/g, "&nbsp;&nbsp;&nbsp;&nbsp;").replace(/ /g, "&nbsp;")
+    console.log("Sanitized text: ", text)
+    if (type == "text"){
+        out = `<span class="output-text">${text}</span><br>`;
     }
-    document.querySelector("#output-box").innerHTML = out;
+    else if (type == "error"){
+        out = `<span class="output-error">${text}</span><br>`;
+    }
+    else if (type == "warning"){
+        out = `<span class="output-warning">${text}</span><br>`;
+    }
+    return out;
 }
+function setOutput(text, type, raw=false){
+    document.querySelector("#output-box").innerHTML = outputStyle(text, type, raw=raw);
+}
+
+function appendOutput(text, type){
+    document.querySelector("#output-box").innerHTML += outputStyle(text, type);
+}
+
+function getCompiledCode(){
+    return new Promise((resolve, reject) => {
+        appendOutput("Reading compiler path...\n", "text")
+        let compilerPath = JSON.parse(fs.readFileSync(path.join(__dirname, 'config.json'), 'utf-8'))["compilerPath"];
+        if (compilerPath == "auto") {
+            appendOutput("Auto detecting compiler path in src dir...\n", "text")
+            if (os.platform() == "win32") {
+                appendOutput("Windows detected...\n", "text")
+                compilerPath = path.join(__dirname, 'lpp-c.exe');
+            }
+            else {
+                appendOutput("Linux detected...\n", "text")
+                compilerPath = path.join(__dirname, 'lpp-c');
+            }
+        }
+        const codePath = path.join(__dirname,"_tmp_lppcode.lpp")
+        const compiledCodePath = path.join(__dirname, './_tmp_lppcompiledcode.js');
+        appendOutput("Compiling code...\n", "text")
+        const command = `${compilerPath} ${codePath} -o ${compiledCodePath} --log`;
+        
+        exec(command, (error, stdout, stderr) => {
+            if (error) {
+                console.log(`Error: ${error.message}`);
+                appendOutput(`Error: ${error.message}`);
+                reject(error);
+            }
+            else if (stderr) {
+                console.log(`Stderr: ${stderr}`);
+                appendOutput(`Error: ${stderr}`);
+                reject(stderr);
+            }
+            appendOutput(stdout, "text");
+            const compiledCode = fs.readFileSync(compiledCodePath, 'utf-8');
+            resolve(compiledCode);
+        })
+    });
+}
+
 document.querySelector("#run-button").addEventListener("click", () => {
+    setOutput("Running code...\n", "text");
     const code = editor.value;
     fs.writeFileSync(__dirname + "/_tmp_lppcode.lpp", code);
-    ipcRenderer.send('get-compiled-code');
-    // Run the compiled code
-    let output = "There was an error, abort!";
-    const cmd = `node ${__dirname}/_tmp_lppcompiledcode.js`;
-    exec(cmd, (error, stdout, stderr) => {
-        if (error) {
-            output = error.message;
-            console.error(`Error: ${error.message}`);
-        }
-        else if (stderr) {
-            output = stderr;
-            console.error(`Stderr: ${stderr}`);
-        }
-        else {
-            output = stdout.replace(/\n/g, "<br>");
-            console.log(`Output: ${stdout}`);
-        }
-        document.querySelector("#output-box").innerHTML = output;
-    });
     
+    
+    getCompiledCode().then((compiledCode) => {;
+        // Run the compiled code
+        let output = "There was an error, abort!";
+        appendOutput("\nRunning compiled code...\n", "text");
+        const cmd = `node ${__dirname}/_tmp_lppcompiledcode.js`;
+        exec(cmd, (error, stdout, stderr) => {
+            if (error) {
+                output = error.message;
+                console.error(`Error: ${error.message}`);
+            }
+            else if (stderr) {
+                output = stderr;
+                console.error(`Stderr: ${stderr}`);
+            }
+            else {
+                output = stdout.replace(/\n/g, "<br>");
+                console.log(`Output: ${stdout}`);
+            }
+            appendOutput(output, "text");
+            outputBox.scrollTop = outputBox.scrollHeight
+        });
+    }).catch((error) => {
+        console.error(error);
+        appendOutput("Error: " + error, "error");
+    });
 });

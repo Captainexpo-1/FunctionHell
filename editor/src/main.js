@@ -88,8 +88,8 @@ ipcMain.on('get-compiled-code', (event) => {
     const compiledCodePath = path.join(__dirname, './_tmp_lppcompiledcode.js');
     const command = `${compilerPath} ${codePath} -o ${compiledCodePath}`;
 
-    const { exec } = require('child_process');
-    exec(command, (error, stdout, stderr) => {
+    const { execSync } = require('child_process');
+    execSync(command, (error, stdout, stderr) => {
         if (error) {
             console.log(`Error: ${error.message}`);
             event.returnValue = `console.log(\`Error: ${error.message}\`);`;

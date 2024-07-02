@@ -11,7 +11,7 @@ void Transpiler::m_addStd(){
     "var fileWrite = (path, data) => { try { __fs__.writeFileSync(path(), data(), 'utf8'); } catch (err) { console.error('Error writing to file:', err); }};\n"
     "var fileAppend = (path, data) => { try { __fs__.appendFileSync(path(), data(), 'utf8'); } catch (err) { console.error('Error writing to file:', err); }};\n"
     "var varErr = () => console.error('Variable is not a function');\n"
-    "var log = (...args) => { let x = []; for(let i = 0; i < args.length; i++) { x.push(args[i]()) } console.log(...x)}\n"
+    "var log = (...args) => {for(let i = 0; i < args.length; i ++){process.stdout.write(String(args[i]()))}}\n"
     "var at = (x, index) => x()[index];\n"
     "var sin = (x) => Math.sin(x());\n"
     "var cos = (x) => Math.cos(x());\n"

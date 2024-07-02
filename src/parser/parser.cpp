@@ -121,9 +121,9 @@ Function* Parser::m_parseFunctionLiteral() {
     Function* fn = new Function(params, dataType, body);
     fn->captures = m_functionCaptures[m_functionCaptures.size()-1];
     for(VariableCaptureAccess* vcc : fn->captures){
-        std::cout << "CAPTURED: " << vcc->toString();
+        //std::cout << "CAPTURED: " << vcc->toString();
     }
-    std::cout << std::endl;
+    //std::cout << std::endl;
     m_functionCaptures.pop_back();
     return fn;
 }
@@ -193,7 +193,7 @@ DataType* Parser::m_rawParseDataType(TOKENTYPE type){
         case INTEGER_TYPE:
             return new IntegerType();
         case FLOAT_TYPE:
-            std::cout << "FLOAT TYPE" << std::endl;
+            //std::cout << "FLOAT TYPE" << std::endl;
             return new FloatType();
         case STRING_TYPE:
             return new StringType();
@@ -303,7 +303,7 @@ Expression* Parser::m_parseAtom() {
         return new IntegerLiteral(std::stoi(m_eat(INTEGER).value));
     } 
     else if (m_CurrentToken.type == FLOAT){
-        std::cout << "FLOAT LITERAL GOT" << std::endl;
+        //std::cout << "FLOAT LITERAL GOT" << std::endl;
         return new FloatLiteral(std::stof(m_eat(FLOAT).value));
     }
     else if (m_CurrentToken.type == NEWLINE){

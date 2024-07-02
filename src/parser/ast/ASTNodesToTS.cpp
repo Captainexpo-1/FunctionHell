@@ -34,7 +34,7 @@ std::string IntegerLiteral::toJS() {
 }
 
 std::string FloatLiteral::toJS() {
-    std::cout << "TRANSPILED FLOAT TO " << std::to_string(value) << std::endl;
+    //std::cout << "TRANSPILED FLOAT TO " << std::to_string(value) << std::endl;
     return std::to_string(value);
 }
 
