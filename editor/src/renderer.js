@@ -106,6 +106,7 @@ editor.addEventListener('input', (event) => {
 var setScroll = () => {
     highlightedCode.scrollTop = editor.scrollTop;
     highlightedCode.scrollLeft = editor.scrollLeft;
+    document.querySelector("#numbers").scrollTop = editor.scrollTop;
 }
 editor.addEventListener('scroll', setScroll);
 
@@ -135,10 +136,10 @@ function updateFontSize(){
     highlightedCode.style.fontSize = fontSize + "px";
     document.querySelector("#hover-box").style.fontSize = fontSize + "px";
 
-    editor.style.paddingLeft = `${fontSize/2}px`
-    highlightedCode.style.paddingLeft = `${fontSize/2}px`
+    editor.style.left = `${fontSize}px`
+    highlightedCode.style.left = `${fontSize}px`
 
-    document.querySelector("#numbers").fontSize = fontSize
+    document.querySelector("#numbers").style.fontSize = `${fontSize}px`;
 }
 editor.addEventListener("keydown", (e) => {
     //curSuggestion = suggest();
@@ -354,6 +355,15 @@ function highlightLine(line) {
     return highlightedLine;
 }
 
+function getNewlines(code){
+    let lines = code.split("\n");
+    let newlines = "";
+    for (let i = 0; i < lines.length; i++){
+        newlines += i + 1 + "<br>";
+    }
+    return newlines + "<br>".repeat(1000);
+}
+
 function highlight(code) {
     let highlightedCode = "";
     const lines = code.split("\n");
@@ -364,8 +374,7 @@ function highlight(code) {
         }
     }
     setScroll()
-    //console.log(getNewlines(code))
-    //ocument.querySelector("#numbers").innerHTML = getNewlines(code)
+    //document.querySelector("#numbers").innerHTML = getNewlines(code)
     return highlightedCode + "\n".repeat(10);
 
 }

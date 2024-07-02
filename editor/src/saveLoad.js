@@ -13,7 +13,7 @@ function saveFile(quickSave = false){
     } 
     if (quickSave == true){
         if (file_lastLoad == null){
-            document.getElementById("output-box").innerHTML = "Error: Unable to quicksave as no file is opened."
+            setOutput("Error: Unable to quicksave as no file is opened.", "error")
             return;
         }
         else{
