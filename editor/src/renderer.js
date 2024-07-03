@@ -34,16 +34,16 @@ var holdingControl = false;
 
 var sampleProgram = `var void fizzbuzz = void <int n, int j> { // The function fizzbuzz returns void and takes two integer functions n and j as arguments
     if (j % 15 == 0) { // If statement: if j mod 15 is 0 then execute the body
-        log with (string <> { ret "FizzBuzz" }) // The body: calls the function "log" with a function argument that returns "FizzBuzz
+        log with (string <> { ret "FizzBuzz\\n" }) // The body: calls the function "log" with a function argument that returns "FizzBuzz
     }
     else if (j % 5 == 0){ // If the previous if was false, check if j mod 5 is 0, if it is execute the body
-        log with (string <> { ret "Buzz" }) // call "log" with a function that returns "Buzz" 
+        log with (string <> { ret "Buzz\\n" }) // call "log" with a function that returns "Buzz" 
     }
     else if (j % 3 == 0){
-        log with (string <> { ret "Fizz" })
+        log with (string <> { ret "Fizz\\n" })
     }
     else {
-        log with (int <> { ret ^j })
+        log with (int <> { ret ^j }, string <> { ret "\\n"})
     }
     if (j < n) {
         ^fizzbuzz with (int <> { ret ^n } , int <> { ret ^j + 1 }) // Recursive call
@@ -318,7 +318,12 @@ function highlightLine(line) {
 
             let cstr = "\""
             while (line[j] != "\"" && j < line.length){
-                cstr += line[j]
+                if (line[j] == "\\"){
+                    // Got escape char
+                    j++;
+                    cstr += `<span class="escape-char">${line[j-1]+line[j]}</span>`
+                }
+                else cstr += line[j]
                 j++;
             }
             // cstr = "hello

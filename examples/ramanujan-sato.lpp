@@ -64,14 +64,14 @@ var void runTests = void <> {
 
     // Test factorial
     log with (string <> {ret "factorial():"}, ^nl)
-    log with (string <> {ret "\t5! = "}, int <> { ret ^factorial with (int <> { ret 5 }) }, ^nl) // Expected output: 5! = 120 GOOD!
-    log with (string <> {ret "\t0! = "}, int <> { ret ^factorial with (int <> { ret 0 }) }, ^nl) // Expected output: 0! = 1 GOOD!
-    log with (string <> {ret "\t1! = "}, int <> { ret ^factorial with (int <> { ret 1 }) }, ^nl) // Expected output: 1! = 1 GOOD!
+    log with (string <> {ret "\t5! = "}, int <> { ret ^factorial with (int <> { ret 5 }) }, ^nl)
+    log with (string <> {ret "\t0! = "}, int <> { ret ^factorial with (int <> { ret 0 }) }, ^nl)
+    log with (string <> {ret "\t1! = "}, int <> { ret ^factorial with (int <> { ret 1 }) }, ^nl)
 
     // Test iPow
     log with (string <> {ret "iPow():"}, ^nl)
-    log with (string<>{ret"\t"},int <> { ret 2 }, string <> { ret "^" }, int <> { ret 3 }, string <> { ret " = "}, int <> { ret ^iPow with (int <> { ret 2 }, int <> { ret 3 }, int <> { ret 1 }) }, ^nl) // Expected output: 2^3 = 8 GOOD!
-    log with (string<>{ret"\t"},int <> { ret 5 }, string <> { ret "^" }, int <> { ret 0 }, string <> { ret " = "}, int <> { ret ^iPow with (int <> { ret 5 }, int <> { ret 0 }, int <> { ret 1 }) }, ^nl) // Expected output: 5^0 = 1 GOOD!
+    log with (string<>{ret"\t"},int <> { ret 2 }, string <> { ret "^" }, int <> { ret 3 }, string <> { ret " = "}, int <> { ret ^iPow with (int <> { ret 2 }, int <> { ret 3 }, int <> { ret 1 }) }, ^nl)
+    log with (string<>{ret"\t"},int <> { ret 5 }, string <> { ret "^" }, int <> { ret 0 }, string <> { ret " = "}, int <> { ret ^iPow with (int <> { ret 5 }, int <> { ret 0 }, int <> { ret 1 }) }, ^nl)
 
     // Test prefix
     log with (string <> {ret "prefix() = "}, float <> { ret ^prefix }, ^nl)
