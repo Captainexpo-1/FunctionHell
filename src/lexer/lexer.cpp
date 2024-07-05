@@ -16,7 +16,6 @@ bool isIDChar(char test){
 }
 
 std::vector<Token> Lexer::tokenize(std::string source) {
-    std::cout << "TOKENIZING!" << std::endl;
     m_Source = source;
     tokens.clear();
     std::smatch match;
@@ -38,7 +37,6 @@ std::vector<Token> Lexer::tokenize(std::string source) {
                             continue;
                         }
                     }
-                    //std::cout << "GOT: " << token_strings[tokenType] << " at line " << m_Line << ", column " << m_Column << ": " << (tokenType != NEWLINE ? match.str() : "\\n") << std::endl;
                     tokens.emplace_back(Token(tokenType, match.str(), m_Line, m_Column));
                     if(tokenType == NEWLINE) {
                         m_Line += 1;

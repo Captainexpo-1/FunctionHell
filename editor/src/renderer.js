@@ -54,22 +54,33 @@ fizzbuzz with (int <> { ret 100 }, int <> { ret 0 }) // Recursively call the fiz
 
 function isNodeInstalled() {
     return new Promise((resolve, reject) => {
-      exec('node -v', (error, stdout, stderr) => {
-        if (error | stderr) {
-            console.error(`Error: ${error.message}`);
-            resolve(false); // Not installed
-        } else {
-            setOutput(`Node.js version: ${stdout}`, "text");
-            resolve(true); // Installed
-        }
-      });
+        exec('node -v', (error, stdout, stderr) => {
+            if (error | stderr) {
+                console.error(`Error: ${error.message}`);
+                resolve(false); // Not installed
+            } else {
+                setOutput(`Node.js version: ${stdout}`, "text");
+                resolve(true); // Installed
+            }
+        });
     });
 }
-  
 function disableRunButton() {
     const rb = document.getElementById("run-button")
     rb.disabled = true;
     rb.style.cursor = "not-allowed";
+}
+
+function setThemeColors(){
+    const file = fs.readFileSync(path.join(__dirname, 'themes/theme.json'), 'utf-8')
+    const theme = JSON.parse(file)
+    const root = document.documentElement;
+
+    for (let key in theme){
+        const color = theme[key];
+        root.style.setProperty(`--${key}-color`, `rgb(${color[0]}, ${color[1]}, ${color[2]})`);
+    }
+
 }
 
 window.addEventListener("DOMContentLoaded", (e)=>{
@@ -83,7 +94,9 @@ window.addEventListener("DOMContentLoaded", (e)=>{
         highlightedCode.innerHTML = highlight(editor.value);
         updateSuggestionHover()
         suggest()
+        setThemeColors()
     });
+    
 })
 
 editor.addEventListener('input', (event) => {
@@ -187,6 +200,9 @@ editor.addEventListener("keydown", (e) => {
         }
         else if (e.key.toLowerCase() == "s"){
             saveFile(true)
+        }
+        else if (e.key.toLowerCase() == "r") {
+            setThemeColors()
         }
     }
     else if (e.key == "Control") {
@@ -411,14 +427,23 @@ function getCompiledCode(){
         appendOutput("Reading compiler path...\n", "text")
         let compilerPath = JSON.parse(fs.readFileSync(path.join(__dirname, 'config.json'), 'utf-8'))["compilerPath"];
         if (compilerPath == "auto") {
-            appendOutput("Auto detecting compiler path in src dir...\n", "text")
-            if (os.platform() == "win32") {
-                appendOutput("Windows detected...\n", "text")
-                compilerPath = path.join(__dirname, 'lpp-c.exe');
+            try{
+                
+                appendOutput("Auto detecting compiler path in src dir...\n", "text")
+                if (os.platform() == "win32") {
+                    appendOutput("Windows detected...\n", "text")
+                    compilerPath = path.join(__dirname, 'lpp-c.exe');
+                }
+                else {
+                    appendOutput("Linux detected...\n", "text")
+                    compilerPath = path.join(__dirname, 'lpp-c');
+                }
+                if (!fs.existsSync(compilerPath)){
+                    throw "Compiler not found"
+                }
             }
-            else {
-                appendOutput("Linux detected...\n", "text")
-                compilerPath = path.join(__dirname, 'lpp-c');
+            catch(e){
+                setOutput("Error: Unable to find lpp-c in source directory, please set 'compilerPath' in config.json\n", "error")
             }
         }
         const codePath = path.join(__dirname,"_tmp_lppcode.lpp")
