@@ -11,11 +11,11 @@ var int factorial = int <int x> {
     ret ^factorial with (int <> { ret ^x - 1 }) * x
 }
 
-var int iPow = int <int a, int b, int c> {
+var int intPow = int <int a, int b, int c> {
     if (b <= 0) {
         ret c
     }
-    ret ^iPow with (int <> { ret ^a }, int <> { ret ^b - 1 }, int <> { ret c * a })
+    ret ^intPow with (int <> { ret ^a }, int <> { ret ^b - 1 }, int <> { ret c * a })
 }
 
 var float prefix = float <> {
@@ -33,7 +33,7 @@ var float seriesPre = float <int k> {
 
 var float seriesPost = float <int k>{
     ret (26390 * ^k + 1103) /
-                ^iPow with (
+                ^intPow with (
                     int <> { ret 396 }, 
                     int <> { ret 4 * ^k }, 
                     int <> { ret 1 }
@@ -68,10 +68,10 @@ var void runTests = void <> {
     log with (string <> {ret "\t0! = "}, int <> { ret ^factorial with (int <> { ret 0 }) }, ^nl)
     log with (string <> {ret "\t1! = "}, int <> { ret ^factorial with (int <> { ret 1 }) }, ^nl)
 
-    // Test iPow
-    log with (string <> {ret "iPow():"}, ^nl)
-    log with (string<>{ret"\t"},int <> { ret 2 }, string <> { ret "^" }, int <> { ret 3 }, string <> { ret " = "}, int <> { ret ^iPow with (int <> { ret 2 }, int <> { ret 3 }, int <> { ret 1 }) }, ^nl)
-    log with (string<>{ret"\t"},int <> { ret 5 }, string <> { ret "^" }, int <> { ret 0 }, string <> { ret " = "}, int <> { ret ^iPow with (int <> { ret 5 }, int <> { ret 0 }, int <> { ret 1 }) }, ^nl)
+    // Test intPow
+    log with (string <> {ret "intPow():"}, ^nl)
+    log with (string<>{ret"\t"},int <> { ret 2 }, string <> { ret "^" }, int <> { ret 3 }, string <> { ret " = "}, int <> { ret ^intPow with (int <> { ret 2 }, int <> { ret 3 }, int <> { ret 1 }) }, ^nl)
+    log with (string<>{ret"\t"},int <> { ret 5 }, string <> { ret "^" }, int <> { ret 0 }, string <> { ret " = "}, int <> { ret ^intPow with (int <> { ret 5 }, int <> { ret 0 }, int <> { ret 1 }) }, ^nl)
 
     // Test prefix
     log with (string <> {ret "prefix() = "}, float <> { ret ^prefix }, ^nl)

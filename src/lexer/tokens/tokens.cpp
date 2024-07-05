@@ -56,7 +56,7 @@ std::vector<TOKENTYPE> token_priorities = {
     // Checked last
 };
 
-std::map<int, std::string> token_regexes = {
+std::map<TOKENTYPE, std::string> token_regexes = {
     {NEWLINE, "\\n"},
     {WHITESPACE, "[ |\\t|\\r]+"},
     {IDENTIFIER, "[a-zA-Z_][a-zA-Z0-9_]*"},
@@ -106,7 +106,7 @@ std::map<int, std::string> token_regexes = {
 };
 
 
-std::map<int, std::string> token_strings = {
+std::map<TOKENTYPE, std::string> token_strings = {
     {NEWLINE, "NEWLINE"},
     {END_OF_FILE, "END_OF_FILE"},
     {IDENTIFIER, "IDENTIFIER"},

@@ -55,9 +55,9 @@ enum TOKENTYPE {
     CARAT,
 };
 
-extern std::map<int, std::string> token_strings;
+extern std::map<TOKENTYPE, std::string> token_strings;
 
-extern std::map<int, std::string> token_regexes;
+extern std::map<TOKENTYPE, std::string> token_regexes;
 
 extern std::vector<TOKENTYPE> token_priorities;
 
