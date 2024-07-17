@@ -97,12 +97,7 @@ std::string FunctionParameter::toJS() {
 
 std::string VariableAssignment::toJS() {
     std::string valJs = "";
-    if(dynamic_cast<VariableAccess*>(value) != nullptr){
-        VariableAccess* va = dynamic_cast<VariableAccess*>(value);
-        valJs = va->name;
-    }else{
-        valJs = value->toJS();
-    }
+    valJs = value->toJS();
 
     return name + " = " + valJs + ";\n";
 }
@@ -178,4 +173,8 @@ std::string VoidType::toJS(){
 
 std::string ListType::toJS(){
     return subType->toJS() + "[]";
+}
+
+std::string AnyType::toJS(){
+    return "any";
 }

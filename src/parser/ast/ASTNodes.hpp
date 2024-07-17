@@ -6,7 +6,14 @@
 #include <iostream>
 #include <algorithm>
 
-class ASTNode {
+
+class Node{
+public:
+    virtual ~Node() = default;
+    virtual std::string toString() = 0;
+    virtual std::string toJS() = 0;
+};
+class ASTNode : public Node{
 public:
     ASTNode();
     virtual ~ASTNode(); // Virtual destructor for proper cleanup
@@ -14,7 +21,7 @@ public:
     virtual std::string toJS();
 };
 
-class DataType {
+class DataType : public Node {
 public:
     virtual ~DataType(); // Virtual destructor for proper cleanup
     virtual std::string toString() = 0;
@@ -251,6 +258,14 @@ public:
     DataType* subType;
     ListType(DataType* subType);
     ~ListType(); // Destructor to delete subType
+    std::string toString();
+    std::string toJS();
+};
+
+class AnyType : public DataType {
+public:
+    AnyType();
+    ~AnyType(); // Destructor
     std::string toString();
     std::string toJS();
 };

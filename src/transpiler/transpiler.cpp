@@ -12,7 +12,15 @@ void Transpiler::m_addStd(){
     "var fileAppend = (path, data) => { try { __fs__.appendFileSync(path(), data(), 'utf8'); } catch (err) { console.error('Error writing to file:', err); }};\n"
     "var varErr = () => console.error('Variable is not a function');\n"
     "var log = (...args) => {for(let i = 0; i < args.length; i ++){process.stdout.write(String(args[i]()))}}\n"
-    "var at = (x, index) => x()[index];\n"
+    "var at = (x, index) => x()[index()];\n"
+    "var push = (x, val) => { let l = x(); l.push(val()); return l; };\n"
+    "var remove = (x, index) => x().splice(index(), 1);\n"
+    "var listOf = (val, length) => Array(length()).fill(val());\n"
+    "var setAt = (x, index, val) => {let y = x(); y[index()] = val(); return y;};\n"
+    "var stringAt = at;\n"
+    "var intAt = at;\n"
+    "var floatAt = at;\n"
+    "var boolAt = at;\n"
     "var sin = (x) => Math.sin(x());\n"
     "var cos = (x) => Math.cos(x());\n"
     "var tan = (x) => Math.tan(x());\n"
@@ -31,11 +39,9 @@ std::string Transpiler::transpile(std::vector<ASTNode*> statements) {
     m_addStd();
     for (ASTNode* statement : statements) {
         m_output += m_genericTranspile(statement);
-        // Make sure there is a semicolon at the end of the statement
         if ( m_output[m_output.size()-1] != ';') {
             m_output += ';';
         }
-        //m_output += "\n";
     }
     return m_output;
 }

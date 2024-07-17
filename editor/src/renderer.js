@@ -276,7 +276,7 @@ function suggest() {
     return c 
 }
 function highlightWord(word){
-    if (/\d+/.test(word)) {
+    if (/^\d+/.test(word)) {
         return `<span class="number">${word}</span>`;
     } else if (/\d+\.\d+/.test(word)) {
         return `<span class="number">${word}</span>`;
@@ -337,7 +337,17 @@ function highlightLine(line) {
                 if (line[j] == "\\"){
                     // Got escape char
                     j++;
-                    cstr += `<span class="escape-char">${line[j-1]+line[j]}</span>`
+                    switch (line[j]){
+                        case "x":
+                            j += 2;    
+                            cstr += `<span class="escape-char">${line[j-3]+line[j-2]+line[j-1]+line[j]}</span>`
+                            break;
+                        default:
+                            cstr += `<span class="escape-char">${line[j-1]+line[j]}</span>`
+                            break;
+                        
+                    }
+
                 }
                 else cstr += line[j]
                 j++;

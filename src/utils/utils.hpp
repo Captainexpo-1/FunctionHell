@@ -9,7 +9,7 @@
 #include "../parser/ast/ASTNodes.hpp"
 
 template <typename T>
-bool util_isType(ASTNode* node) {
+bool util_isType(Node* node) {
     return dynamic_cast<T*>(node) != nullptr;
 }
 

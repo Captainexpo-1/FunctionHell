@@ -8,7 +8,6 @@ std::map<TOKENTYPE, int> ORDER_OF_OPERATIONS = {
     {STAR, 20},
     {SLASH, 20},
     {PERCENT, 20},
-    //{EQUAL, 5},
     {EQUAL_EQUAL, 5},
     {BANG_EQUAL, 5},
     {LESS, 5},

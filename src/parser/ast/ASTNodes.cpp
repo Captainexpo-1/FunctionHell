@@ -1,5 +1,12 @@
 #include "ASTNodes.hpp"
 
+std::string Node::toJS() {
+    return "null";
+}
+
+std::string Node::toString() {
+    return "Node";
+}
 
 ASTNode::ASTNode() {}
 
@@ -285,6 +292,8 @@ std::string VoidType::toString() {
     return "void";
 }
 
+
+
 ListType::~ListType() {
     delete subType;
 }
@@ -293,4 +302,13 @@ ListType::ListType(DataType* subType) : subType(subType) {}
 
 std::string ListType::toString() {
     return "list(" + subType->toString() + ")";
+}
+
+
+AnyType::~AnyType() {}
+
+AnyType::AnyType() {}
+
+std::string AnyType::toString() {
+    return "any";
 }

@@ -8,7 +8,14 @@ bool areSimilar(DataType* d1, DataType* d2, bool f = false) {
     if (d1->toString() == "float" && d2->toString() == "int") {
         return true;
     }
-    
+    if (d1->toString() == "any" || d2->toString() == "any") {
+        return true;
+    }
+    if (util_isType<ListType>(d1) && util_isType<ListType>(d2)) {
+        ListType* l1 = dynamic_cast<ListType*>(d1);
+        ListType* l2 = dynamic_cast<ListType*>(d2);
+        return areSimilar(l1->subType, l2->subType);
+    }
     return !f ? areSimilar(d2, d1, true) : false;
 }
 
@@ -35,7 +42,7 @@ void TypeChecker::m_addSTD(Scope* scope) {
     scope->variables["fileRead"] = new StringType();
     scope->variables["fileWrite"] = new VoidType();
     scope->variables["varErr"] = new VoidType();
-    scope->variables["at"] = new IntegerType();
+    scope->variables["at"] = new AnyType();
     scope->variables["sin"] = new FloatType();
     scope->variables["cos"] = new FloatType();
     scope->variables["tan"] = new FloatType();
@@ -45,6 +52,17 @@ void TypeChecker::m_addSTD(Scope* scope) {
     scope->variables["len"] = new IntegerType();
     scope->variables["str"] = new StringType();
     scope->variables["sqrt"] = new FloatType();
+    scope->variables["push"] = new ListType(new AnyType());
+    scope->variables["setAt"] = new ListType(new AnyType());
+    scope->variables["listOf"] = new ListType(new AnyType());
+    scope->variables["str"] = new StringType();
+    scope->variables["len"] = new IntegerType();
+    // Hack!
+    scope->variables["stringAt"] = new StringType();
+    scope->variables["intAt"] = new IntegerType();
+    scope->variables["floatAt"] = new FloatType();
+    scope->variables["boolAt"] = new BoolType();
+
     scope->variables["PI"] = new FloatType();
 }
 
@@ -164,7 +182,7 @@ int TypeChecker::m_checkVariableDeclaration(VariableDeclaration* vd, Scope* scop
 
 int TypeChecker::m_checkFunction(Function* f, DataType* expectedType, Scope* scope) {
     if (f->returnType != nullptr && !areSimilar(f->returnType, expectedType)) {
-        langError("Function return type: " + f->returnType->toString() + " does not match variable type: " + expectedType->toString(), -1, -1);
+        langError("Function return type: " + f->returnType->toString() + " does not match variable type: " + expectedType->toString() + " in " + f->toString(), -1, -1);
         return 1;
     }
     Scope* funcScope = new Scope();
@@ -183,12 +201,12 @@ int TypeChecker::m_checkVariableAccess(VariableAccess* va, DataType* expectedTyp
         langError("Variable " + va->name + " not declared in this scope (access)", -1, -1);
         return 1;
     }
-    if (found->toString() != expectedType->toString()) {
+    if (found->toString() != expectedType->toString() && expectedType->toString() != "any" && found->toString() != "any"){
         langError("Variable " + va->name + " type does not match variable type", -1, -1);
         return 1;
     }
     if (va->args.size() > 0){
-
+        // TODO: Impliment function call arg checking
     }
     return 0;
 }
@@ -207,7 +225,7 @@ int TypeChecker::m_checkReturnStatement(ASTNode* statement, Scope* scope, DataTy
         //std::cout << "    - Return value is not null" << std::endl;
         DataType* rs_dt = m_getExpression(rs->value, scope);
         if (rs_dt == nullptr) {
-            langError("Return value type is null",-1,-1);
+            langError("Return value type is null: " + statement->toString(),-1,-1);
             return 1;
         }
         //std::cout << "    - Return value type: " << rs_dt->toString() << std::endl;
@@ -288,20 +306,27 @@ DataType* TypeChecker::m_checkBinaryExpression(BinaryExpression* node, Scope* sc
     DataType* d1 = m_getExpression(node->left, scope);
     DataType* d2 = m_getExpression(node->right, scope);
     if (d1 == nullptr || d2 == nullptr) {
+        langError("Binary expression type is null: " + node->toString(), -1, -1);
         return nullptr;
     }
     DataType* o = m_evalOperation(d1, d2, node->op);
     if (o == nullptr) {
+        if (d1->toString() == "any" || d2->toString() == "any") {
+            return new AnyType();
+        }
         langError("Operation " + node->toString() + " not valid for types " + d1->toString() + " and " + d2->toString(), -1, -1);
         return nullptr;
     }
+    std::cout << "passed binop\n";
     return o;
 }
 
 DataType* TypeChecker::m_getExpression(ASTNode* expr, Scope* scope) {
     if (util_isType<BinaryExpression>(expr)) {
+        std::cout << "Binary expression" << std::endl;
         return m_checkBinaryExpression(dynamic_cast<BinaryExpression*>(expr), scope);
     } else if (util_isType<VariableAccess>(expr)) {
+        std::cout << "Variable access" << std::endl;
         VariableAccess* va = dynamic_cast<VariableAccess*>(expr);
         DataType* dt = m_findInImmediateScope(va->name, scope);
         if (dt == nullptr) {
@@ -318,7 +343,12 @@ DataType* TypeChecker::m_getExpression(ASTNode* expr, Scope* scope) {
             return nullptr;
         }
         return dt;
-    } else {
+    } else if (util_isType<ListLiteral>(expr)){
+        ListLiteral* ll = dynamic_cast<ListLiteral*>(expr);
+        DataType* dt = new ListType(ll->dataType);
+        return dt;
+    } 
+    else {
         DataType* dt = m_literalType(expr, scope);
         if (dt == nullptr) {
             langError("Unknown expression type: " + expr->toString(), -1, -1);
@@ -326,7 +356,6 @@ DataType* TypeChecker::m_getExpression(ASTNode* expr, Scope* scope) {
         }
         return dt;
     }
-    return nullptr;
 }
 
 DataType* TypeChecker::m_evalOperation(DataType* d1, DataType* d2, const std::string& op) {
@@ -381,7 +410,7 @@ DataType* TypeChecker::m_evalOperation(DataType* d1, DataType* d2, const std::st
         {"bool == bool", new BoolType()},
         {"bool != bool", new BoolType()},
         {"bool && bool", new BoolType()},
-        {"bool || bool", new BoolType()}
+        {"bool || bool", new BoolType()},
     };
 
     std::string s = d1->toString() + " " + op + " " + d2->toString();
