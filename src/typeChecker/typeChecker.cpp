@@ -317,20 +317,17 @@ DataType* TypeChecker::m_checkBinaryExpression(BinaryExpression* node, Scope* sc
         langError("Operation " + node->toString() + " not valid for types " + d1->toString() + " and " + d2->toString(), -1, -1);
         return nullptr;
     }
-    std::cout << "passed binop\n";
     return o;
 }
 
 DataType* TypeChecker::m_getExpression(ASTNode* expr, Scope* scope) {
     if (util_isType<BinaryExpression>(expr)) {
-        std::cout << "Binary expression" << std::endl;
         return m_checkBinaryExpression(dynamic_cast<BinaryExpression*>(expr), scope);
     } else if (util_isType<VariableAccess>(expr)) {
-        std::cout << "Variable access" << std::endl;
         VariableAccess* va = dynamic_cast<VariableAccess*>(expr);
         DataType* dt = m_findInImmediateScope(va->name, scope);
         if (dt == nullptr) {
-            langError("Variable " + va->name + " not declared in this scope (access)", -1, -1);
+            langError("Variable " + va->name + " not declared in this scope", -1, -1);
             return nullptr;
         }
         return dt;

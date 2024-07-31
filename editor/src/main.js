@@ -76,10 +76,10 @@ ipcMain.on('get-compiled-code', (event) => {
     if (compilerPath == "auto") {
         const os = require('os');
         if (os.platform() == "win32") {
-            compilerPath = path.join(__dirname, 'lpp-c.exe');
+            compilerPath = path.join(__dirname, 'fnhell.exe');
         }
         else {
-            compilerPath = path.join(__dirname, 'lpp-c');
+            compilerPath = path.join(__dirname, 'fnhell');
         }
     }
     const codePath = path.join(__dirname,"_tmp_lppcode.lpp")

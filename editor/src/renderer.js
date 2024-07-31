@@ -442,18 +442,18 @@ function getCompiledCode(){
                 appendOutput("Auto detecting compiler path in src dir...\n", "text")
                 if (os.platform() == "win32") {
                     appendOutput("Windows detected...\n", "text")
-                    compilerPath = path.join(__dirname, 'lpp-c.exe');
+                    compilerPath = path.join(__dirname, 'fnhell.exe');
                 }
                 else {
                     appendOutput("Linux detected...\n", "text")
-                    compilerPath = path.join(__dirname, 'lpp-c');
+                    compilerPath = path.join(__dirname, 'fnhell');
                 }
                 if (!fs.existsSync(compilerPath)){
                     throw "Compiler not found"
                 }
             }
             catch(e){
-                setOutput("Error: Unable to find lpp-c in source directory, please set 'compilerPath' in config.json\n", "error")
+                setOutput("Error: Unable to find fnhell in source directory, please set 'compilerPath' in config.json\n", "error")
             }
         }
         const codePath = path.join(__dirname,"_tmp_lppcode.lpp")
