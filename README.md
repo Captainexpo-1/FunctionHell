@@ -222,29 +222,25 @@ fizzbuzz with (int <> { ret 100 }, int <> { ret 0 })
 
 The standard library provides many functions that make life easier for the programmer. The full list includes
 
-* `fileRead`: Reads a file synchronously fileRead with (path) equivalent to fs.readFileSync(path, 'utf8')
-* `fileWrite`: Writes data to a file synchronously fileWrite with (path, data) equivalent to fs.writeFileSync(path(), data(), 'utf8')
-* `fileAppend`: Appends data to a file synchronously fileAppend with (path, data) equivalent to fs.appendFileSync(path(), data(), 'utf8')
-* `log`: Print to stdout log with (x) equivalent to print(x()) in Python
-* `at`: Returns the value at the specified index in a string or list and returns the result at with (x, index) equivalent to x[index] in C++, Python, etc.
-* `push`: Appends to a list push with (x, val) equivalent to x.push(val) in Python
-* `remove`: Removes an element at a specific index remove with (x, index) equivalent to x.splice(index, 1) in JavaScript
-* `listOf`: Creates a list with a specified value and length listOf with (val, length) equivalent to Array(length).fill(val) in JavaScript
-* `setAt`: Sets the value at a specified index setAt with (x, index, val) equivalent to x[index] = val in JavaScript
-* `stringAt`: Returns the character at a specified index in a string stringAt with (x, index) equivalent to x[index] in JavaScript
-* `intAt`: Returns the integer at a specified index intAt with (x, index) equivalent to x[index] in JavaScript
-* `floatAt`: Returns the float at a specified index floatAt with (x, index) equivalent to x[index] in JavaScript
-* `boolAt`: Returns the boolean at a specified index boolAt with (x, index) equivalent to x[index] in JavaScript
-* `sin`: Returns the sine of a radian value sin with (x) equivalent to Math.sin(x) in JavaScript
-* `cos`: Returns the cosine of a radian value cos with (x) equivalent to Math.cos(x) in JavaScript
-* `tan`: Returns the tangent of a radian value tan with (x) equivalent to Math.tan(x) in JavaScript
-* `abs`: Returns the absolute value abs with (x) equivalent to Math.abs(x) in JavaScript
-* `parseint`: Converts a string to an integer parseint with (x) equivalent to parseInt(x) in JavaScript
-* `parsefloat`: Converts a string to a float parsefloat with (x) equivalent to parseFloat(x) in JavaScript
-* `len`: Returns the length of a string or list len with (x) equivalent to x.length in JavaScript
-* `str`: Converts a value to a string str with (x) equivalent to x.toString() in JavaScript
-* `sqrt`: Returns the square root of a number sqrt with (x) equivalent to Math.sqrt(x) in JavaScript
-* `PI`: Returns the value of PI equivalent to Math.PI in JavaScript
+* `fileRead`: Reads a file synchronously, fileRead with (path) is equivalent to fs.readFileSync(path, 'utf8')
+* `fileWrite`: Writes data to a file synchronously, fileWrite with (path, data) is equivalent to fs.writeFileSync(path(), data(), 'utf8')
+* `fileAppend`: Appends data to a file synchronously, fileAppend with (path, data) is equivalent to fs.appendFileSync(path(), data(), 'utf8')
+* `log`: Print to stdout, log with (x) is equivalent to print(x()) in Python
+* `at`: Returns the value at the specified index in a string or list and returns the resulting list, at with (x, index) is equivalent to x()[index()] in C++, Python, etc.
+* `push`: Appends to a list and retuns the resulting array, push with (x, val) is equivalent to return x().push(val) in Python
+* `remove`: Removes an element at a specific index and returns the resulting list, remove with (x, index) is equivalent to x().splice(index(), 1) in JavaScript
+* `listOf`: Creates a list with a specified value and length, listOf with (val, length) is equivalent to Array(length()).fill(val()) in JavaScript
+* `setAt`: Sets the value at a specified index and returns the resulting list, setAt with (x, index, val) is equivalent to x[index] = val in JavaScript
+* `sin`: Returns the sine of a radian value, sin with (x) is equivalent to Math.sin(x()) in JavaScript
+* `cos`: Returns the cosine of a radian value, cos with (x) is equivalent to Math.cos(x()) in JavaScript
+* `tan`: Returns the tangent of a radian value, tan with (x) is equivalent to Math.tan(x()) in JavaScript
+* `abs`: Returns the absolute value, abs with (x) is equivalent to Math.abs(x()) in JavaScript
+* `parseint`: Converts a string to an integer, parseint with (x) is equivalent to parseInt(x()) in JavaScript
+* `parsefloat`: Converts a string to a float, parsefloat with (x) is equivalent to parseFloat(x()) in JavaScript
+* `len`: Returns the length of a string or list, len with (x) is equivalent to x().length in JavaScript
+* `str`: Converts a value to a string, str with (x) is equivalent to x().toString() in JavaScript
+* `sqrt`: Returns the square root of a number, sqrt with (x) is equivalent to Math.sqrt(x()) in JavaScript
+* `PI`: Returns the value of PI, equivalent to Math.PI in JavaScript
 
 
-\* Note: The standard library is still in development and may change in the future, and there may be additional functions or language features not listed here. 
+\* Note: There may be additional functions or language features not listed here. 
